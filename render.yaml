@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: madonna-bot
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
+    envVars:
+      - key: TELEGRAM_TOKEN
+        value: SEU_TOKEN_DO_TELEGRAM
+      - key: OPENAI_API_KEY
+        value: SUA_API_KEY_DA_OPENAI

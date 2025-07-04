@@ -1,28 +1,23 @@
-# 💋 Madonna Debochada — Bot de Telegram com Personalidade
+# Madonna Bot 💋🎤
 
-Um bot para Telegram que responde mensagens com **deboches românticos**, frases de efeito e conselhos dramáticos, como uma diva que nunca perde a pose.
+Um bot do Telegram com personalidade debochada e romântica, usando ChatGPT.  
+Roda 24h por dia gratuitamente via [Render.com](https://render.com).
 
-🧠 Baseado no ChatGPT (OpenAI)  
-💬 Desenvolvido com Python + Telegram Bot API  
-🌐 Roda 24h gratuitamente no [Render.com](https://render.com)
-
----
-
-## 🎯 Objetivo
-
-Criar uma experiência divertida e interativa em grupos do Telegram, onde a Madonna (bot) responde **como se fosse uma personagem debochada, romântica e irônica**, sem nunca parecer um robô.
+### 🌟 Comandos:
+- `/beijo` – Manda um beijo especial
+- `/conselho` – Dá conselhos amorosos ou debochados
+- `/verso` – Solta uma frase dramática, romântica ou poética
 
 ---
 
-## ⚙️ Tecnologias Usadas
+### 🚀 Como usar:
+1. Suba esses arquivos em um repositório no GitHub.
+2. Vá em [render.com](https://render.com) e conecte sua conta GitHub.
+3. Crie um novo **Web Service** e selecione esse repositório.
+4. O Render detectará o arquivo `render.yaml`.
+5. Adicione as variáveis de ambiente:
+   - `TELEGRAM_TOKEN` → pegue com o BotFather
+   - `OPENAI_API_KEY` → pegue em https://platform.openai.com/api-keys
+6. Clique em **Deploy** e pronto! Madonna estará online 24h.
 
-- [Python 3](https://www.python.org/)
-- [PyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI)
-- [OpenAI GPT-4o](https://platform.openai.com/)
-- [Render](https://render.com) (para deploy gratuito 24h)
-
----
-
-## 🚀 Como usar
-
-### 1. Clone o repositório ou envie os
+💅 Feito com amor, drama e deboche.
