@@ -1,10 +1,10 @@
 import os
+import openai
 import telebot
-from openai import OpenAI
 
 # Pega tokens do ambiente
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
+bot = telebot.TeleBot(os.getenv("TELEGRAM_TOKEN"))
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 client = OpenAI(api_key=OPENAI_API_KEY)
