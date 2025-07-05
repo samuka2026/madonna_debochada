@@ -6,11 +6,8 @@ import telebot
 openai.api_key = os.getenv("OPENAI_API_KEY")
 bot = telebot.TeleBot(os.getenv("TELEGRAM_TOKEN"))
 
-bot = telebot.TeleBot(TELEGRAM_TOKEN)
-client = OpenAI(api_key=OPENAI_API_KEY)
-
 def responder_com_madonna(texto):
-    resposta = client.chat.completions.create(
+    resposta = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "Você é uma diva debochada e romântica. Responda com classe, ironia e charme."},
@@ -25,8 +22,6 @@ def responder_tudo(message):
         resposta = responder_com_madonna(message.text)
         bot.send_message(message.chat.id, resposta)
     except Exception as e:
-        bot.send_message(message.chat.id, "A Madonna travou o salto... 💅")
-        print("Erro:", e)
+        bot.send_message(message.chat.id, "A madame travou de salto. 😵‍💫")
 
-print("👠 Madonna está online e plena!")
-bot.polling()
+bot.infinity_polling()
