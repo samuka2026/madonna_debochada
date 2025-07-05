@@ -2,15 +2,18 @@ import os
 import openai
 import telebot
 
-# Pega os tokens do ambiente
-openai.api_key = os.getenv("OPENAI_API_KEY")
-bot = telebot.TeleBot(os.getenv("TELEGRAM_TOKEN"))
+# Pega os tokens das variáveis de ambiente
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+
+bot = telebot.TeleBot(TELEGRAM_TOKEN)
+openai.api_key = OPENAI_API_KEY
 
 def responder_com_madonna(texto):
     resposta = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "Você é uma diva debochada e romântica. Responda com classe, ironia e charme."},
+            {"role": "system", "content": "Você é uma diva debochada e romântica. Responda com charme, ironia e afeto exagerado."},
             {"role": "user", "content": texto}
         ]
     )
@@ -22,6 +25,7 @@ def responder_tudo(message):
         resposta = responder_com_madonna(message.text)
         bot.send_message(message.chat.id, resposta)
     except Exception as e:
+        print(f"Erro: {e}")  # Mostra o erro no log da Render
         bot.send_message(message.chat.id, "A madame travou de salto. 😵‍💫")
 
 bot.infinity_polling()
