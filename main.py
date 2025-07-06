@@ -1,12 +1,14 @@
+from flask import Flask, request
 import telebot
-import random
 import os
+import random
 
-# Pegue o token do ambiente ou cole diretamente aqui
-TOKEN = os.getenv("TELEGRAM_TOKEN") or "COLE_SEU_TOKEN_AQUI"
+TOKEN = os.getenv("TELEGRAM_TOKEN")
+RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
+
 bot = telebot.TeleBot(TOKEN)
+app = Flask(__name__)
 
-# Lista de respostas debochadas e românticas
 respostas_madonna = [
     "Ai meu bem, tenta de novo que dessa vez eu tô zen 💅",
     "Amor, você fala e eu só suspiro... 😘",
@@ -20,13 +22,26 @@ respostas_madonna = [
     "A Madonna não responde qualquer um... mas vou abrir uma exceção 💌"
 ]
 
-# Toda mensagem recebida gera uma resposta aleatória
-@bot.message_handler(func=lambda message: True)
-def responder(message):
+@app.route(f"/{TOKEN}", methods=["POST"])
+def receber_update():
+    update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
+    bot.process_new_updates([update])
+    return "ok", 200
+
+@app.route("/", methods=["GET"])
+def configurar_webhook():
+    url_completa = f"{RENDER_URL}/{TOKEN}"
+    info = bot.get_webhook_info()
+    if info.url != url_completa:
+        bot.remove_webhook()
+        bot.set_webhook(url=url_completa)
+        return "🎤 Madonna acordou, configurou o webhook e tá pronta, amor 💄", 200
+    return "💋 Madonna já está online e fabulosa", 200
+
+@bot.message_handler(func=lambda msg: True)
+def responder_com_deboche(message):
     resposta = random.choice(respostas_madonna)
     bot.send_message(message.chat.id, resposta)
 
-# Inicia o bot com polling (escutando 24h)
 if __name__ == "__main__":
-    print("Madonna tá online, meu amor 💄")
-    bot.infinity_polling()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
