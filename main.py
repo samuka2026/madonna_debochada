@@ -3,16 +3,16 @@ import telebot
 import openai
 import os
 
-# Tokens de ambiente
+# Carrega variáveis de ambiente
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 
-# Inicializa bot e Flask
-bot = telebot.TeleBot(TOKEN)
+# Inicializa Flask e bot do Telegram
 app = Flask(__name__)
+bot = telebot.TeleBot(TOKEN)
 
-# Estilo debochado e romântico
+# Função que gera respostas estilo Madonna
 def responder_com_madonna(texto):
     openai.api_key = OPENAI_KEY
     resposta = openai.chat.completions.create(
@@ -36,18 +36,18 @@ def responder_tudo(message):
     except Exception as e:
         print(f"Erro ao responder mensagem: {e}")
 
-# Webhook que recebe mensagens do Telegram
+# Webhook do Telegram que recebe mensagens
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
     try:
-        data = request.stream.read().decode("utf-8")
-        update = telebot.types.Update.de_json(data)
+        json_data = request.stream.read().decode("utf-8")
+        update = telebot.types.Update.de_json(json_data)
         bot.process_new_updates([update])
     except Exception as e:
-        print(f"Erro ao processar update: {e}")
+        print(f"Erro no webhook: {e}")
     return "ok", 200
 
-# Endpoint que configura o webhook (sem sobrecarregar o Telegram)
+# Página inicial: ativa o webhook se necessário
 @app.route("/", methods=["GET"])
 def index():
     try:
@@ -58,11 +58,11 @@ def index():
             bot.set_webhook(url=url_esperada)
             print("✅ Webhook atualizado com sucesso.")
         else:
-            print("ℹ Webhook já está correto.")
+            print("ℹ️ Webhook já estava correto.")
     except Exception as e:
         print(f"Erro ao configurar webhook: {e}")
     return "Madonna tá online, amor 💋"
 
-# Inicia servidor Flask
-if _name_ == "_main_":
+# Inicia o servidor Flask
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
