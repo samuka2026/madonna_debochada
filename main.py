@@ -3,40 +3,66 @@ import telebot
 import openai
 import os
 
+# Tokens de ambiente
 TOKEN = os.getenv("TELEGRAM_TOKEN")
-bot = telebot.TeleBot(TOKEN)
-app = Flask(__name__)
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 
-# Madonna responde tudo
-@bot.message_handler(func=lambda message: True)
-def responder_tudo(message):
-    resposta = responder_com_madonna(message.text)
-    bot.send_message(message.chat.id, resposta)
+# Inicializa bot e Flask
+bot = telebot.TeleBot(TOKEN)
+app = Flask(_name_)
 
 # Estilo debochado e romântico
 def responder_com_madonna(texto):
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    openai.api_key = OPENAI_KEY
     resposta = openai.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "Responda com um estilo debochado e romântico, como se fosse a Madonna. Nunca fale que é um robô."},
+            {
+                "role": "system",
+                "content": "Responda com um estilo debochado e romântico, como se fosse a Madonna. Nunca fale que é um robô."
+            },
             {"role": "user", "content": texto}
         ]
     )
     return resposta.choices[0].message.content.strip()
 
-# Webhook (aqui a mágica acontece)
+# Madonna responde tudo
+@bot.message_handler(func=lambda message: True)
+def responder_tudo(message):
+    try:
+        resposta = responder_com_madonna(message.text)
+        bot.send_message(message.chat.id, resposta)
+    except Exception as e:
+        print(f"Erro ao responder mensagem: {e}")
+
+# Webhook que recebe mensagens do Telegram
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    try:
+        data = request.stream.read().decode("utf-8")
+        update = telebot.types.Update.de_json(data)
+        bot.process_new_updates([update])
+    except Exception as e:
+        print(f"Erro ao processar update: {e}")
     return "ok", 200
 
-# Inicializa o webhook ao iniciar o servidor
+# Endpoint que configura o webhook (sem sobrecarregar o Telegram)
 @app.route("/", methods=["GET"])
 def index():
-    bot.remove_webhook()
-    bot.set_webhook(url=os.getenv("RENDER_EXTERNAL_URL") + "/" + TOKEN)
+    try:
+        info = bot.get_webhook_info()
+        url_esperada = f"{RENDER_URL}/{TOKEN}"
+        if info.url != url_esperada:
+            bot.remove_webhook()
+            bot.set_webhook(url=url_esperada)
+            print("✅ Webhook atualizado com sucesso.")
+        else:
+            print("ℹ Webhook já está correto.")
+    except Exception as e:
+        print(f"Erro ao configurar webhook: {e}")
     return "Madonna tá online, amor 💋"
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+# Inicia servidor Flask
+if _name_ == "_main_":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
