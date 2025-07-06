@@ -10,7 +10,7 @@ RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 
 # Inicializa bot e Flask
 bot = telebot.TeleBot(TOKEN)
-app = Flask(_name_)
+app = Flask(__name__)
 
 # Estilo debochado e romântico
 def responder_com_madonna(texto):
