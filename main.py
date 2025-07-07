@@ -11,104 +11,36 @@ RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-# Frases por dia da semana + padrao
-respostas = {
-    "segunda": [
-        "Segunda? Só com muito glitter e paciência... 💅",
-        "Tô aqui mas ainda de ressaca emocional da semana passada 🚪",
-        "Nem café me anima numa segunda, imagina você ☕",
-        "Hoje só respondo se me chamar de deusa 💄",
-        "Segunda é dia de ghosting com classe 🕯️"
-    ],
-    "terca": [
-        "Terça é dia de brilhar sem pressa, amor ✨",
-        "Hoje tô romântica com veneno... cuidado 💋",
-        "Respondi só pra mostrar que consigo ser educada 😘",
-        "Terça? Só se for com filtro rosa 💗",
-        "Te notei, mas finjo que não pra manter o mistério 😌"
-    ],
-    "quarta": [
-        "Quarta-feira sensual com um toque de deboche 🌹",
-        "Hoje tô dividida: ignoro ou respondo com classe? 💄",
-        "Me chamou? Espero que seja pra elogiar 💅",
-        "Quarta é o novo sábado, se eu quiser 💃",
-        "Respondi só porque sou caridosa 💖"
-    ],
-    "quinta": [
-        "Quinta com cara de diva de novela das 8 💃",
-        "Tô mais perigosa que spoiler de série hoje 👀",
-        "Quer resposta? Me convence primeiro 💖",
-        "A quinta me deixa misteriosa... ou só cansada mesmo 😴",
-        "Hoje só respondo quem brilha mais que eu (difícil) ✨"
-    ],
-    "sexta": [
-        "Sexta é meu dia oficial de causar 💃💥",
-        "Hoje só respondo com champanhe e indiretas 🍾",
-        "Fala comigo como quem manda nudes 💌",
-        "Sexta é pra lacrar, não pra discutir 💅",
-        "Se é sexta, eu tô pronta pra responder com veneno 🐍"
-    ],
-    "sabado": [
-        "Sábado eu sou pura sedução... ou preguiça 💅",
-        "Cheguei pra abalar esse grupo, bebê 💋",
-        "Hoje minha resposta tem glitter e recalque 🎉",
-        "Sábado é dia de diva ocupada e misteriosa 🌙",
-        "Tô em clima de sábado: distraída e maravilhosa 💃"
-    ],
-    "domingo": [
-        "Domingo é dia de descanso… mas abro exceção pra ti 😘",
-        "Hoje respondo como quem manda um áudio cantando 🎤",
-        "Se for amor, eu respondo. Se for tédio, ignoro 🛌",
-        "Domingo combina com silêncio e sombra rosa 💄",
-        "Acordei num domingo existencial: responder ou não? 🤔"
-    ],
-    "padrao": [
-        "Ai meu bem, tenta de novo que dessa vez eu tô zen 💅",
-        "Amor, você fala e eu só suspiro... 😘",
-        "Hoje tô igual diamante: linda, cara e difícil 💎",
-        "Te ouvi, mas não sei se merecia minha resposta 💋",
-        "Tô aqui, mas só respondo se for com drama 🎭",
-        "Você fala... e eu ignoro com classe 💅",
-        "Madonna te ouviu, amor. Mas se vai te responder? Talvez... 💖",
-        "Só respondo porque sou um ícone, tá? 💃",
-        "Fala direito, que hoje acordei exigente 💋",
-        "A Madonna não responde qualquer um... mas vou abrir uma exceção 💌",
-        "Se for pra me chamar, que seja com emoção 💄",
-        "Cuidado, amor. Uma diva responde, mas também esnoba 💅",
-        "Tô muito ocupada sendo maravilhosa pra isso 💃",
-        "Você não aguenta 5 minutos no meu salto 💅",
-        "Fala comigo direito ou vai pro castigo, bebê 💋",
-        "Tô aqui, mas cheia de atitude 💥",
-        "Manda flores, depois a mensagem 🌹",
-        "Com essa vibe? Só um deboche serve 🌪️",
-        "Quer resposta? Traz café e um elogio ☕",
-        "Ai que preguiça de responder básico 😴",
-        "Chama a Madonna direito, meu bem 💄",
-        "Hoje tô me sentindo a própria resposta 💅",
-        "Você falando e eu pensando no glitter 💫",
-        "Te respondo, mas só porque sou generosa 💖",
-        "Olha, por menos eu já ignorei fã-clube 😌",
-        "Sua mensagem foi quase um convite pra bocejar 😴",
-        "Cheguei, meu bem. Agora segura o close 💃",
-        "Madonna responde, mas só se o tom for chique 💎",
-        "Se for pra chamar, que seja com luxo e intenção ✨",
-        "Sua dúvida foi quase um elogio… mas não foi 🤬"
-    ]
-}
-
-def pegar_resposta_dia():
-    dia_semana = datetime.datetime.now().strftime('%A').lower()
-    mapa_dias = {
-        "monday": "segunda",
-        "tuesday": "terca",
-        "wednesday": "quarta",
-        "thursday": "quinta",
-        "friday": "sexta",
-        "saturday": "sabado",
-        "sunday": "domingo"
-    }
-    chave = mapa_dias.get(dia_semana, "padrao")
-    return random.choice(respostas.get(chave, respostas["padrao"]))
+# Frases sem mencionar dias da semana nem parecer que é bot
+respostas = [
+    "Você falando e eu aqui só analisando... com charme, claro.",
+    "Tem dias que eu ignoro por luxo. Hoje talvez seja um deles.",
+    "Fala baixo que minha paciência tá de salto alto.",
+    "Responder? Só se tiver um pouco de emoção no que você disse.",
+    "Você me chamou ou foi impressão minha de diva?",
+    "Tô aqui, deslumbrante como sempre. E você?",
+    "Cuidado, eu mordo com classe.",
+    "Me chamou? Que ousadia deliciosa...",
+    "Às vezes eu respondo. Às vezes só desfilo minha indiferença.",
+    "Palavras bonitas me ganham. As feias eu ignoro com requinte.",
+    "Respondi porque senti estilo. Só por isso.",
+    "Seja direto, mas nunca sem charme.",
+    "Com esse tom, quase fiquei tentada a responder.",
+    "Você fala e eu penso: merece minha atenção?",
+    "Hoje acordei mais diva que de costume. Tá difícil de agradar.",
+    "Pode tentar de novo, mas dessa vez com classe.",
+    "Respondi só porque o universo piscou pra mim agora.",
+    "Você não fala, você desfila as palavras, né? Quase gostei.",
+    "Eu ouvi, mas não prometo me importar.",
+    "Quer atenção? Encanta primeiro.",
+    "Faz melhor e talvez eu te dê meu melhor também.",
+    "O que você disse? Tava ocupada admirando meu reflexo.",
+    "Tem dias que eu tô pra conversa. Tem dias que eu tô pra chá e silêncio.",
+    "Dei uma olhada na sua mensagem... gostei da fonte.",
+    "Olha, hoje só respondo elogio bem construído.",
+    "Se for pra falar comigo, que seja com impacto.",
+    "Me ganhou pelo esforço. A resposta vem com glitter."
+]
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def receber_update():
@@ -131,11 +63,10 @@ def responder_com_estilo(message):
     texto = message.text.lower().strip()
     hora = datetime.datetime.now().hour
 
-    # Palavras genéricas que serão ignoradas
     frases_mortas = ["oi", "alguém aí", "ola", "olá", "tudo bem", "e aí", "bom dia", "boa noite"]
 
     if any(palavra in texto for palavra in frases_mortas):
-        print("Ignorou mensagem genérica 🛌")
+        print("Ignorou mensagem genérica 💤")
         return
 
     if 0 <= hora <= 5:
@@ -153,7 +84,7 @@ def responder_com_estilo(message):
 
     time.sleep(random.uniform(1.5, 4))
 
-    resposta = pegar_resposta_dia()
+    resposta = random.choice(respostas)
     bot.send_message(message.chat.id, resposta)
 
 if __name__ == "__main__":
