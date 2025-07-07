@@ -40,19 +40,18 @@ def atualizar_historico(saudacao, frase):
 
 # Frases genéricas
 respostas = [
-    # ... (mantenha aqui todas as frases genéricas que já estavam, acima de 50)
     "Você falando e eu aqui só analisando... com charme, claro.",
     "Tem dias que eu ignoro por luxo. Hoje talvez seja um deles.",
     "Fala baixo que minha paciência tá de salto alto.",
-    # ... (continue com suas outras frases)
+    # ... (adicione suas outras frases aqui)
 ]
 
-# Boas maneiras com mais de 99 opções
+# Boas maneiras com mais de 99 opções (sem número visível)
 boas_maneiras = {
-    "bom dia": [f"Bom dia número {i}, com deboche e purpurina." for i in range(1, 105)],
-    "boa tarde": [f"Boa tarde {i}. Só porque acordei fabulosa agora à tarde." for i in range(1, 105)],
-    "boa noite": [f"Boa noite {i}. Que seus sonhos sejam tão icônicos quanto eu." for i in range(1, 105)],
-    "boa madrugada": [f"Boa madrugada {i}. Se está aqui essa hora, é porque tem bom gosto." for i in range(1, 105)]
+    "bom dia": ["Bom dia, com deboche e purpurina." for _ in range(105)],
+    "boa tarde": ["Boa tarde. Só porque acordei fabulosa agora à tarde." for _ in range(105)],
+    "boa noite": ["Boa noite. Que seus sonhos sejam tão icônicos quanto eu." for _ in range(105)],
+    "boa madrugada": ["Boa madrugada. Se está aqui essa hora, é porque tem bom gosto." for _ in range(105)],
 }
 
 @app.route(f"/{TOKEN}", methods=["POST"])
@@ -92,7 +91,7 @@ def responder_com_estilo(message):
                 usadas.extend(historico_saudacoes[saudacao][dia])
             candidatas = [f for f in frases if f not in usadas]
             if not candidatas:
-                frase = random.choice(frases)  # se esgotar, ignora filtro
+                frase = random.choice(frases)
             else:
                 frase = random.choice(candidatas)
             atualizar_historico(saudacao, frase)
