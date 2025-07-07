@@ -266,7 +266,12 @@ def responder_com_estilo(message):
     for saudacao, frases in boas_maneiras.items():
         if saudacao in texto:
             time.sleep(random.uniform(1.5, 3))
-            bot.send_message(message.chat.id, random.choice(frases))
+            nome = message.from_user.first_name or "meu bem"
+resposta = random.choice(frases).replace("Bom dia", f"Bom dia, {nome}")\
+    .replace("Boa tarde", f"Boa tarde, {nome}")\
+    .replace("Boa noite", f"Boa noite, {nome}")\
+    .replace("Boa madrugada", f"Boa madrugada, {nome}")
+bot.send_message(message.chat.id, resposta)
             return
 
     frases_mortas = ["oi", "alguém aí", "ola", "olá", "tudo bem", "e aí"]
