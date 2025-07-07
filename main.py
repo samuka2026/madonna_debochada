@@ -11,7 +11,6 @@ RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-# Frases genéricas
 respostas = [
     "Você falando e eu aqui só analisando... com charme, claro.",
     "Tem dias que eu ignoro por luxo. Hoje talvez seja um deles.",
@@ -66,28 +65,51 @@ respostas = [
     "Meu silêncio foi a melhor parte da conversa até agora."
 ]
 
-# Demais listas (boas_maneiras, elogios, apelidos, etc.) continuam as mesmas e não serão coladas aqui por brevidade.
-# Suponha que todas estão no código exatamente como estavam antes.
+boas_maneiras = {
+    "bom dia": ["Bom dia, meu bem. Mas só porque acordei generosa.", "..."],
+    "boa tarde": ["Boa tarde, mas com classe. Senão eu reviro os olhos.", "..."],
+    "boa noite": ["Boa noite, meu bem. Mas se for pra sonhar, capricha na história.", "..."],
+    "boa madrugada": ["Boa madrugada. Mas se for drama, me chama em voz baixa.", "..."]
+}
+
+@app.route(f"/{TOKEN}", methods=["POST"])
+def receber_update():
+    update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
+    bot.process_new_updates([update])
+    return "ok", 200
+
+@app.route("/", methods=["GET"])
+def configurar_webhook():
+    url_completa = f"{RENDER_URL}/{TOKEN}"
+    info = bot.get_webhook_info()
+    if info.url != url_completa:
+        bot.remove_webhook()
+        bot.set_webhook(url=url_completa)
+        return "🎤 Madonna acordou, configurou o webhook e tá pronta, amor 💄", 200
+    return "💋 Madonna já está online e fabulosa", 200
 
 @bot.message_handler(func=lambda msg: True)
 def responder_com_estilo(message):
     texto = message.text.lower().strip()
-    if not texto:
+    texto_limpo = texto.replace("!", "").replace("?", "")
+    hora = datetime.datetime.now().hour
+
+    mencionada = "madonna" in texto or f"@{bot.get_me().username.lower()}" in texto
+    saudacao_detectada = any(s in texto for s in boas_maneiras)
+
+    if not (mencionada or saudacao_detectada):
         return
 
-    nome_bot = "madonna"
-    mencionada = nome_bot in texto or f"@{bot.get_me().username.lower()}" in texto
-
-    # Responde automaticamente a saudações
     for saudacao, frases in boas_maneiras.items():
         if saudacao in texto:
             time.sleep(random.uniform(1.5, 3))
             bot.send_message(message.chat.id, random.choice(frases))
             return
 
-    # Só responde o restante se for mencionada
-    if not mencionada:
-        return
+    if mencionada:
+        time.sleep(random.uniform(1.5, 3))
+        bot.send_message(message.chat.id, random.choice(respostas))
 
-    # Aqui segue normalmente todas as outras condições de resposta como emojis, xingamentos, elogios, etc.
-    # (código continua igual a partir daqui...)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
