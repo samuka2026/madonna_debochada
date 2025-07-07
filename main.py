@@ -39,8 +39,37 @@ def configurar_webhook():
     return "💋 Madonna já está online e fabulosa", 200
 
 @bot.message_handler(func=lambda msg: True)
-def responder_com_deboche(message):
-    resposta = random.choice(respostas_madonna)
+def responder_com_estilo(message):
+    texto = message.text.lower().strip()
+    hora = datetime.datetime.now().hour
+
+    # Palavras genéricas que serão ignoradas
+    frases_mortas = ["oi", "alguém aí", "ola", "olá", "tudo bem", "e aí", "bom dia", "boa noite"]
+
+    # Se a mensagem for muito básica, ignora
+    if any(palavra in texto for palavra in frases_mortas):
+        print("Ignorou mensagem genérica 💤")
+        return
+
+    # Define humor baseado na hora
+    if 0 <= hora <= 5:
+        chance_responder = 0.5  # madrugada
+    elif 6 <= hora <= 11:
+        chance_responder = 0.7  # manhã
+    elif 12 <= hora <= 17:
+        chance_responder = 0.8  # tarde
+    else:
+        chance_responder = 0.9  # noite
+
+    # Decide se vai responder ou ignorar
+    if random.random() > chance_responder:
+        print("Madonna resolveu ignorar... com elegância 😎")
+        return
+
+    # Suspense antes de responder
+    time.sleep(random.uniform(1.5, 4))
+
+    resposta = pegar_resposta_dia()
     bot.send_message(message.chat.id, resposta)
 
 if __name__ == "__main__":
