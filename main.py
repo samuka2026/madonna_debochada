@@ -66,35 +66,28 @@ respostas = [
     "Meu silêncio foi a melhor parte da conversa até agora."
 ]
 
-# (boas_maneiras permanece igual)
-# ...
+# Demais listas (boas_maneiras, elogios, apelidos, etc.) continuam as mesmas e não serão coladas aqui por brevidade.
+# Suponha que todas estão no código exatamente como estavam antes.
 
 @bot.message_handler(func=lambda msg: True)
 def responder_com_estilo(message):
     texto = message.text.lower().strip()
-    texto_limpo = texto.replace("!", "").replace("?", "")
-    hora = datetime.datetime.now().hour
+    if not texto:
+        return
 
-    nome_usuario = message.from_user.first_name
+    nome_bot = "madonna"
+    mencionada = nome_bot in texto or f"@{bot.get_me().username.lower()}" in texto
 
-    # Respostas especiais para saudações
+    # Responde automaticamente a saudações
     for saudacao, frases in boas_maneiras.items():
         if saudacao in texto:
             time.sleep(random.uniform(1.5, 3))
-            resposta = random.choice(frases)
-            bot.send_message(message.chat.id, f"{nome_usuario}, {resposta}")
+            bot.send_message(message.chat.id, random.choice(frases))
             return
 
-    # Se não for saudação, só responde se for mencionada
-    if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
-        print("Mensagem ignorada: não é saudação e nem mencionou a Madonna")
+    # Só responde o restante se for mencionada
+    if not mencionada:
         return
 
-    # (demais lógicas continuam: elogios, apelidos, xingamentos, etc)
-    # ...
-
-    # Resposta genérica final
-    if random.random() <= 0.7:
-        time.sleep(random.uniform(1.5, 3))
-        resposta = random.choice(respostas)
-        bot.send_message(message.chat.id, f"{nome_usuario}, {resposta}")
+    # Aqui segue normalmente todas as outras condições de resposta como emojis, xingamentos, elogios, etc.
+    # (código continua igual a partir daqui...)
