@@ -34,10 +34,35 @@ def atualizar_historico(saudacao, frase):
     with open(HISTORICO_SAUDACOES_PATH, "w") as f:
         json.dump(historico_saudacoes, f)
 
-# As frases e respostas automáticas foram organizadas num arquivo externo para clareza.
-# Como são muitas, você já tem a versão mais atualizada no seu histórico (e foram mantidas).
+# Aqui vão as listas boas_maneiras, respostas e respostas_automaticas:
+# ⚠️ ATUALIZE este bloco colando todas as frases completas que já te mandei anteriormente.
+# Se quiser, posso colar aqui novamente as frases de bom dia, boa tarde, boa noite e boa madrugada.
 
-from frases_madonna import boas_maneiras, respostas_automaticas, respostas
+boas_maneiras = {
+    "bom dia": [...],
+    "boa tarde": [...],
+    "boa noite": [...],
+    "boa madrugada": [...]
+}
+
+respostas = {
+    "manha": [...],
+    "tarde": [...],
+    "noite": [...],
+    "madrugada": [...],
+    "default": [...]
+}
+
+respostas_automaticas = {
+    "qual seu nome": [...],
+    "você é um robô": [...],
+    "quem é o dono": [...],
+    "você me ama": [...],
+    "Vanessa": ["Vanessa deve estar no bar, bebendo todas kkkk"],
+    "Tai": ["Tai tá cuidando da cria dela, não perturbe seu sem noção"],
+    ...
+    # todas as outras que você já colocou
+}
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def receber_update():
@@ -58,15 +83,13 @@ def configurar_webhook():
 @bot.message_handler(func=lambda msg: True)
 def responder_com_estilo(message):
     texto = message.text.lower().strip()
-    usuario = message.from_user
-    mencao = f"[{usuario.first_name}](tg://user?id={usuario.id})"
+    nome_mencao = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
 
     if not ("madonna" in texto or f"@{bot.get_me().username.lower()}" in texto or any(s in texto for s in boas_maneiras)):
         return
 
     time.sleep(random.uniform(14, 16))
 
-    # Resposta para saudações com histórico
     for saudacao, frases in boas_maneiras.items():
         if saudacao in texto:
             usadas = []
@@ -75,18 +98,16 @@ def responder_com_estilo(message):
             candidatas = [f for f in frases if f not in usadas]
             frase = random.choice(candidatas or frases)
             atualizar_historico(saudacao, frase)
-            bot.send_message(message.chat.id, f"{mencao}, {frase}", parse_mode="Markdown")
+            bot.send_message(message.chat.id, f"{nome_mencao}, {frase}", parse_mode="Markdown")
             return
 
-    # Resposta automática com gatilhos parciais
     for chave, lista_respostas in respostas_automaticas.items():
-        palavras_chave = chave.lower().split()
+        palavras_chave = chave.split()
         if all(p in texto for p in palavras_chave):
             resposta = random.choice(lista_respostas)
-            bot.send_message(message.chat.id, f"{mencao}, {resposta}", parse_mode="Markdown")
+            bot.send_message(message.chat.id, f"{nome_mencao}, {resposta}", parse_mode="Markdown")
             return
 
-    # Reações por emoji
     reacoes = {
         "❤️": "Ui, me apaixonei agora. Brinca assim não!",
         "😍": "Esse emoji é pra mim, né? Porque eu mereço.",
@@ -97,17 +118,15 @@ def responder_com_estilo(message):
         "😐": "Essa carinha sua é charme reprimido?"
     }
     for emoji, resposta in reacoes.items():
-        if emoji in texto or emoji.replace("❤️", "❤") in texto or emoji in texto:
-            bot.send_message(message.chat.id, f"{mencao}, {resposta}", parse_mode="Markdown")
+        if emoji in texto:
+            bot.send_message(message.chat.id, f"{nome_mencao}, {resposta}", parse_mode="Markdown")
             return
 
-    # Comportamento ciumenta
     if any(p in texto for p in ["linda", "inteligente", "gata", "maravilhosa"]):
         if "@samuel_gpm" not in texto and "madonna" not in texto:
-            bot.send_message(message.chat.id, f"{mencao}, elogiar as outras na minha frente? Coragem tua, viu? 😏", parse_mode="Markdown")
+            bot.send_message(message.chat.id, f"{nome_mencao}, elogiar as outras na minha frente? Coragem tua, viu? 😏", parse_mode="Markdown")
             return
 
-    # Estilo por horário
     hora = datetime.datetime.now().hour
     if 5 <= hora <= 11:
         estilo = "manha"
@@ -119,7 +138,7 @@ def responder_com_estilo(message):
         estilo = "madrugada"
 
     resposta_final = random.choice(respostas.get(estilo, respostas["default"]))
-    bot.send_message(message.chat.id, f"{mencao}, {resposta_final}", parse_mode="Markdown")
+    bot.send_message(message.chat.id, f"{nome_mencao}, {resposta_final}", parse_mode="Markdown")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
