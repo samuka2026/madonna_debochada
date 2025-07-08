@@ -6,17 +6,8 @@ import time
 import datetime
 import json
 
-TOKEN = os.getenv("TELEGRAM_TOKEN")from flask import Flask, request
-import telebot
-import os
-import random
-import time
-import datetime
-import json
-
 TOKEN = os.getenv("TELEGRAM_TOKEN")
-RENDER_URL = 
-os.getenv("RENDER_EXTERNAL_URL")
+RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
