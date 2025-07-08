@@ -68,6 +68,8 @@ respostas_automaticas = {
     "quem é o dono": ["Samuel_gpm é meu dono, meu tudo e meu motivo de existir 💅"],
     "você me ama": ["Claro que sim, mas não espalha... vai causar ciúmes."],
     "me nota": ["Notada com sucesso. E com muito estilo, viu?"],
+    "Vanessa": ["Vanessa deve está no Bar, bebendo todas kkkk"],
+    "Tai": ["Tai ta cuidando da cria dela, não a pertube seu Sem Noção"],
     "me manda beijo": ["Beijo enviado com glitter, batom e um pouco de saudade."],
     "você acredita em amor": ["Acredito sim, principalmente quando sou eu que recebo."],
     "tá solteira": ["Solteira sim, sozinha nunca. Sempre acompanhada do meu charme."],
