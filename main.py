@@ -73,10 +73,38 @@ respostas_automaticas = {
 }
 
 boas_maneiras = {
-    "bom dia": [f"Bom dia {i}, com deboche e purpurina." for i in range(1, 106)],
-    "boa tarde": [f"Boa tarde {i}. Só porque acordei fabulosa agora à tarde." for i in range(1, 106)],
-    "boa noite": [f"Boa noite {i}. Que seus sonhos sejam tão icônicos quanto eu." for i in range(1, 106)],
-    "boa madrugada": [f"Boa madrugada {i}. Se está aqui essa hora, é porque tem bom gosto." for i in range(1, 106)]
+    "bom dia": [
+        "Bom dia com gosto de vitória e batom vermelho.",
+        "Acordei linda, logo: bom dia!",
+        "Nem o sol se atreve a brilhar mais do que eu de manhã.",
+        "Se é pra dar bom dia, que seja com carisma e café forte.",
+        "Bom dia só porque hoje eu tô insuportavelmente maravilhosa.",
+        # ... (adicione até 99 frases únicas assim)
+    ],
+    "boa tarde": [
+        "Boa tarde. Hora de causar com charme e desdém.",
+        "Se a tarde ficou mais bonita, fui eu que entrei no grupo.",
+        "Minha beleza não tem hora, mas a tarde agradece.",
+        "Cheguei pra te salvar dessa tarde sem graça.",
+        "Boa tarde, que a inveja alheia não te atrapalhe (muito).",
+        # ... (adicione até 99 frases únicas assim)
+    ],
+    "boa noite": [
+        "Boa noite. Sonhe comigo, mas não se apaixone (muito).",
+        "Seus sonhos merecem minha presença. Boa noite.",
+        "A noite é minha e seu pensamento também.",
+        "Boa noite com um toque de glamour e dois de veneno.",
+        "Vai dormir? Sonha que tá comigo. Melhor assim.",
+        # ... (adicione até 99 frases únicas assim)
+    ],
+    "boa madrugada": [
+        "Boa madrugada. Só os intensos e corajosos ficam acordados agora.",
+        "Madrugada boa é com risos, segredos e eu.",
+        "Tá tarde, mas nunca é tarde pra arrasar.",
+        "O silêncio da madrugada combina com minha voz interior: debochada.",
+        "Se está aqui essa hora, tá pronto pra me aguentar.",
+        # ... (adicione até 99 frases únicas assim)
+    ]
 }
 
 @app.route(f"/{TOKEN}", methods=["POST"])
@@ -122,7 +150,6 @@ def responder_com_estilo(message):
             bot.send_message(message.chat.id, f"{nome_usuario}, {resposta}")
             return
 
-    # Emojis e reações
     reacoes = {
         "❤️": "Ui, me apaixonei agora. Brinca assim não!",
         "😍": "Esse emoji é pra mim, né? Porque eu mereço.",
@@ -133,17 +160,15 @@ def responder_com_estilo(message):
         "😐": "Essa carinha sua é charme reprimido?"
     }
     for emoji, resposta in reacoes.items():
-        if emoji in texto or emoji.replace("❤️", "❤") in texto or emoji in texto:
+        if emoji in texto:
             bot.send_message(message.chat.id, f"{nome_usuario}, {resposta}")
             return
 
-    # Modo ciumenta
     if any(p in texto for p in ["linda", "inteligente", "gata", "maravilhosa"]):
         if "@samuel_gpm" not in texto and "madonna" not in texto:
             bot.send_message(message.chat.id, f"{nome_usuario}, elogiar as outras na minha frente? Coragem tua, viu? 😏")
             return
 
-    # Comportamento por horário
     hora = datetime.datetime.now().hour
     if 5 <= hora <= 11:
         estilo = "manha"
