@@ -58,8 +58,8 @@ respostas_automaticas = {
     "você é um robô": [...],
     "quem é o dono": [...],
     "você me ama": [...],
-    "Vanessa": ["Vanessa deve estar no bar, bebendo todas kkkk"],
-    "Tai": ["Tai tá cuidando da cria dela, não perturbe seu sem noção"],
+    "Vanessa": ["Ela deve estar no bar, bebendo todas kkkk."],
+    "Tai": ["Tá cuidando da cria dela, não perturbe seu sem noção."],
     ...
     # todas as outras que você já colocou
 }
