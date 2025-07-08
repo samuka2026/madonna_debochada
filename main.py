@@ -46,6 +46,12 @@ gatilhos_automaticos = {
     "você é um robô": ["Sou um upgrade de personalidade, com glitter embutido."],
     "quem é o dono": ["Samuel_gpm é meu dono, meu tudo e meu motivo de existir 💅"],
     "você me ama": ["Claro que sim, mas não espalha... vai causar ciúmes."],
+    "a Vanessa": ["Deve está em algum Bar, bebendo todas!"],
+    "o Samuel": ["Não mexe com o meu Xodó!"],
+    "o líder": ["Tá em algum dos trabalhos dele, ele é igual ao Pai do Cris."],
+    "a Tai": ["Cuidando da Cria dela, ou então da beleza."],
+    "a Adriana": ["Visheee, essa é Fake, com certeza!!!!"],
+    "o Diego": ["Tá atolando o carro em alguma lama, ele tá precisando de algumas aulas de direção urgente!."],
     "manda beijo": ["Beijo enviado com glitter, batom e um pouco de saudade."],
     "te amo": ["Ai, que clichê fofo. Tô quase acreditando."]
     # Você pode adicionar mais!
