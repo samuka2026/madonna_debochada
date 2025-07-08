@@ -15,7 +15,8 @@ import datetime
 import json
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
-RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
+RENDER_URL = 
+os.getenv("RENDER_EXTERNAL_URL")
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
@@ -49,7 +50,6 @@ def frase_nao_usada(frases, categoria):
 
 # 🔥 Frases e listas personalizáveis
 gatilhos_automaticos = {
-    gatilhos_automaticos = {
     "qual seu nome": ["Me chamo Madonna, diva das respostas e rainha do deboche."],
     "você é um robô": ["Sou um upgrade de personalidade, com glitter embutido."],
     "quem é o dono": ["Samuel_gpm é meu dono, meu tudo e meu motivo de existir 💅"],
