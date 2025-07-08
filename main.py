@@ -390,7 +390,7 @@ def responder_com_estilo(message):
 
     for chave, lista_respostas in respostas_automaticas.items():
     palavras_chave = chave.lower().split()
-    if all(p in texto for p in palavras_chave):
+    if all(palavra in texto for palavra in palavras_chave):
         resposta = random.choice(lista_respostas)
         bot.send_message(message.chat.id, f"{nome_usuario}, {resposta}")
         return
