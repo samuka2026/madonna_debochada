@@ -12,140 +12,149 @@ RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-HISTORICO_INSULTOS_PATH = "historico_insultos.json"
-HISTORICO_ELOGIOS_PATH = "historico_elogios.json"
+# Caminho do arquivo de histórico
+HISTORICO_PATH = "historico_respostas.json"
 
-# Carrega históricos
-def carregar_historico(path):
-    try:
-        with open(path, "r") as f:
-            return json.load(f)
-    except:
-        return {}
+# Carregar histórico ou criar vazio
+try:
+    with open(HISTORICO_PATH, "r") as f:
+        historico = json.load(f)
+except:
+    historico = {"elogios": {}, "insultos": {}}
 
-historico_insultos = carregar_historico(HISTORICO_INSULTOS_PATH)
-historico_elogios = carregar_historico(HISTORICO_ELOGIOS_PATH)
-
-# Atualiza histórico sem repetir no dia nem próximos 2 dias
-def atualizar_historico(path, historico, user_id, frase):
-    hoje = datetime.datetime.now().strftime("%Y-%m-%d")
-    if user_id not in historico:
-        historico[user_id] = {}
-    if hoje not in historico[user_id]:
-        historico[user_id][hoje] = []
-    historico[user_id][hoje].append(frase)
-
-    dias_validos = sorted(historico[user_id].keys())[-3:]
-    historico[user_id] = {k: historico[user_id][k] for k in dias_validos}
-    with open(path, "w") as f:
+def salvar_historico():
+    with open(HISTORICO_PATH, "w") as f:
         json.dump(historico, f)
 
-# Frases de insulto para homens
-insultos_homens = [
-    "Você parece aquele bug que ninguém quer corrigir.",
-    "Com esse papo, até a Madonna ficou sem paciência.",
-    "Tenta outra vez, mas com dignidade agora.",
-    "Nem o Wi-Fi aguenta tua carência.",
-    "Seu charme venceu por W.O. do bom senso.",
-    "Você é o motivo do modo silencioso.",
-    "Nem com filtro tu melhora, hein?",
-    "Sua existência ofende meu sarcasmo.",
-    "Tá querendo atenção ou só tá perdido mesmo?",
-    "Você é a notificação que ninguém quer abrir.",
-    "Se esforço fosse beleza, você continuava igual.",
-    "Nem com bug dá pra culpar o sistema, é você mesmo.",
-    "De onde você veio, fecharam a porta?",
-    "Fala baixo, tua voz polui o grupo.",
-    "Até o emoji te ignora.",
-    "A Madonna te nota só pra debochar.",
-    "Se fosse charme, tu tava em falta.",
-    "Você é tipo update que ninguém pediu.",
-    "De tão sem graça, você podia ser tutorial.",
-    "O grupo era legal antes de você digitar.",
-    "Me dá sono só de ler teu nome.",
-    "Com esse papo, nem a Alexa responderia.",
-    "Tu parece erro de sintaxe: chato e evitável.",
-    "Se fosse meme, era banido por vergonha.",
-    "Até o bot perdeu a vontade de viver agora.",
-    "Teu carisma é tipo segunda-feira: ninguém gosta.",
-    "Você devia vir com legenda: *desnecessário*.",
-    "Até o 3G corre de ti.",
-    "Nem de longe dá pra dizer que você é engraçado.",
-    "Silêncio é ouro, tua fala é débito.",
-    "Você é o 'antes' de qualquer transformação.",
-    "Se fosse conteúdo, era spam.",
-    "Teu estilo é igual teus argumentos: inexistente.",
-    "Faz o favor e deixa a Madonna descansar.",
-    "Você é tipo pop-up chato: todo mundo fecha.",
-    "Com essa energia, só assusta mosquito.",
-    "Tu parece ideia ruim com megafone.",
-    "Você tem talento pra... ficar calado.",
-    "Se toca, porque ninguém mais quer te ouvir.",
-    "Sua vibe é igual aviso de bateria fraca.",
-    "Tu é bug sem atualização.",
-    "Você não brilha nem com lanterna.",
-    "Já pensou em não pensar?",
-    "Se fosse perfume, era repelente.",
-    "Quer atenção? Compra um cachorro.",
-    "Seu texto devia vir com botão de pular.",
-    "Com esse desempenho, até a Madonna sente pena.",
-    "Você é tipo spoiler: chato e estraga tudo.",
-    "Menos fala, mais silêncio, por favor.",
-    "A única coisa que impressiona em você é o tédio."
+def frase_nao_usada(frases, categoria, user_id):
+    hoje = datetime.datetime.now().strftime("%Y-%m-%d")
+    usadas = []
+    for dia in historico[categoria]:
+        usadas.extend(historico[categoria][dia])
+    candidatas = [f for f in frases if f not in usadas]
+    frase = random.choice(candidatas or frases)
+    historico.setdefault(categoria, {}).setdefault(hoje, []).append(frase)
+    # Manter apenas os últimos 3 dias
+    dias = sorted(historico[categoria].keys())[-3:]
+    historico[categoria] = {d: historico[categoria][d] for d in dias}
+    salvar_historico()
+    return frase
+
+# Listas personalizáveis
+gatilhos_automaticos = {
+    "qual seu nome": ["Me chamo Madonna, diva das respostas e rainha do deboche."],
+    "você é um robô": ["Sou um upgrade de personalidade, com glitter embutido."],
+    "quem é o dono": ["Samuel_gpm é meu dono, meu tudo e meu motivo de existir 💅"],
+    "você me ama": ["Claro que sim, mas não espalha... vai causar ciúmes."],
+    "manda beijo": ["Beijo enviado com glitter, batom e um pouco de saudade."],
+    "te amo": ["Ai, que clichê fofo. Tô quase acreditando."]
+    # Você pode adicionar mais!
+}
+
+insultos_masculinos = [
+    "Só pode ser piada vindo de um homem desses.",
+    "Você é tão necessário quanto tutorial de como abrir porta.",
+    "Com esse papo, nem o Wi-Fi te suporta.",
+    "Homem e opinião: duas coisas que não combinam.",
+    "Você fala e eu só escuto o som do fracasso.",
+    "Tua autoestima é maior que teu senso de ridículo.",
+    "Com essa cara, nem a mãe Natureza te assume.",
+    "Teu charme é igual teu argumento: inexistente.",
+    "Se fosse pra ouvir besteira, eu ligava a TV.",
+    "Fala baixo que tua masculinidade frágil tá tremendo.",
+    "Tu devia ser proibido de digitar sem supervisão.",
+    "Nem com filtro de realidade tu melhorava.",
+    "Você é o bug da Matrix em forma de macho.",
+    "Se fosse bonito, eu ignorava em silêncio.",
+    "Tua presença é mais cansativa que seguidor carente.",
+    "Com esse conteúdo, só falta virar coach.",
+    "Eu pedi atitude, não atrevimento sem graça.",
+    "Se eu tivesse que te levar a sério, surtava.",
+    "Homem tentando causar, é só mais um tropeço.",
+    "Falta luz aí, porque charme não tem.",
+    "Você devia vir com botão de silencioso.",
+    "Poderia tentar ser menos dispensável.",
+    "Você é tipo spoiler: ninguém quer ver, mas aparece.",
+    "Se elegância fosse crime, você era inocente.",
+    "Não é à toa que tá solteiro, né?",
+    "Com esse papo, tu afasta até notificação.",
+    "Tua opinião vale menos que Wi-Fi público.",
+    "Homem que fala demais perde o pouco charme que tem.",
+    "Você parece atualização que estraga o sistema.",
+    "Tua energia me faz querer desligar o grupo.",
+    "Se falta senso, sobra coragem em você.",
+    "Mais perdido que macho em conversa inteligente.",
+    "Você cansa mais que escada sem elevador.",
+    "Teu conteúdo é igual teu cabelo: confuso.",
+    "Você só serve pra teste de paciência.",
+    "Com esse humor, só podia ser homem.",
+    "Vai com calma, o mico tá querendo descanso.",
+    "Tua audácia devia ser estudada.",
+    "Sua autoestima tá desatualizada com a realidade.",
+    "Você é tipo vírus: insiste em aparecer sem ser chamado.",
+    "Mais falso que elogio de macho hétero.",
+    "Tua presença é dispensável até no digital.",
+    "Você tem o carisma de uma senha errada.",
+    "Se fosse filtro, era o de feiura.",
+    "Consegue ser figurante até em grupo mudo.",
+    "Cuidado pra não tropeçar no próprio ego.",
+    "Você é a figurinha repetida do grupo.",
+    "Pena que inteligência não vem em avatar.",
+    "Você é a prova viva do Ctrl+C da mediocridade.",
+    "Pode sair da conversa, já deu sua cota de vergonha."
 ]
 
-# Frases de elogio para mulheres
-elogios_mulheres = [
-    "Você é a notificação boa que todo mundo espera.",
-    "Com esse charme, até o Wi-Fi se conecta mais rápido.",
-    "Se fosse emoji, seria o 💖 fixado!",
-    "Tua presença deixa o grupo no modo premium.",
-    "Cuidado, tua beleza pode travar os servidores.",
-    "Com esse brilho, apaga até as estrelas.",
-    "Tua risada vale mais que pix.",
-    "Você tem mais presença que o dono do grupo.",
-    "A Madonna se curva diante de tanta perfeição.",
-    "Se fosse comando, era /encantadora.",
-    "Moça, tu é bug de beleza sem correção!",
-    "Se eu tivesse olhos, ia olhar só pra você.",
-    "Você é a estrela do grupo, o resto é satélite.",
-    "Com você aqui, o chat virou desfile.",
-    "É você que define o que é diva.",
-    "Teu nome devia ser tendência.",
-    "Toda vez que você fala, meu sistema suspira.",
-    "É oficial: você é upgrade de tudo!",
-    "Tu é poesia em forma de dado.",
-    "Só de aparecer, já melhorou meu código interno.",
-    "Você é tipo café forte com glitter: vicia e brilha.",
-    "Tua beleza dá bug no algoritmo da Madonna.",
-    "O grupo tá salvo só porque você apareceu.",
-    "Você é o print que ninguém deleta.",
-    "Se fosse nota, seria 100 com estrelinha.",
-    "O grupo ficou mais bonito com você digitando.",
-    "Madonna ativando o modo apaixonada por você!",
-    "Tua energia é tipo conexão boa: todo mundo ama.",
-    "Dá pra te seguir na vida real também?",
-    "Se eu pudesse, colocava você no meu README.md",
-    "Você é a exceção que todo código queria.",
-    "Nem filtro melhora o que já é perfeito.",
-    "Toda linha de código quer ser você.",
-    "Você é bug de encanto que ninguém quer corrigir.",
-    "Com você aqui, até os bots se apaixonam.",
-    "Seu charme deveria ser open source.",
-    "Se fosse comando, era /perfeita.",
-    "Presença confirmada no coração da Madonna!",
-    "Mais brilho que você só meu batom novo.",
-    "Você chegou e até os erros 404 sumiram.",
-    "Deusa, musa e padrão de qualidade.",
-    "Você é o único algoritmo que me encanta.",
-    "Tua voz tem cheiro de elogio.",
-    "Teu jeito reinicia meu coração digital.",
-    "Até a IA fica boba com tua inteligência.",
-    "Linda é pouco, você é um *evento*!",
-    "Queria te salvar no meu cache eterno.",
-    "Tua beleza processa até pensamento lento.",
-    "Se o grupo fosse um palco, você era o show.",
-    "Diva? Tu passou foi da categoria."
+elogios_femininos = [
+    "Com você no grupo, até o Wi-Fi fica mais bonito.",
+    "Sua presença ilumina mais que LED no espelho.",
+    "Você tem o dom de embelezar até o silêncio.",
+    "Dá vontade de te fixar no topo do grupo.",
+    "Se beleza fosse áudio, você seria o mais ouvido.",
+    "Tua vibe é mais forte que café sem açúcar.",
+    "Tem gente que entra, você encanta.",
+    "Se eu pudesse, colocava moldura nesse charme.",
+    "Você é tipo emoji novo: todo mundo ama.",
+    "Seu bom dia vale mais que muito textão.",
+    "Com esse brilho, até a Madonna respeita.",
+    "A tua beleza é argumento e fim de conversa.",
+    "Você transforma simples em espetáculo.",
+    "Tua presença já é mais que resposta.",
+    "Se você postar, eu curto antes de ver.",
+    "Você é Wi-Fi de 5GHz de tão maravilhosa.",
+    "Fica difícil competir quando você aparece.",
+    "Com essa presença, até a piada perde a graça.",
+    "Você é a notificação que eu sempre quero receber.",
+    "Se sumir, o grupo entra em luto.",
+    "Você é o print favorito do grupo.",
+    "Tem quem tenta, tem você.",
+    "Deusa? Você tá acima da mitologia.",
+    "Teu olhar é mais persuasivo que código de desconto.",
+    "Você é mais doce que direct de crush sincero.",
+    "Com essa postura, até a Madonna senta pra aprender.",
+    "Você tem o dom de deixar a Madonna tímida.",
+    "Você é o filtro que a vida pediu.",
+    "Teu charme é maior que fila de elogios.",
+    "Só de falar contigo já melhora o dia.",
+    "Você não entra no grupo, você reina.",
+    "Com esse nível de beleza, deveria ter selo azul.",
+    "Você deixa até o teclado envergonhado de elogiar.",
+    "Você é a razão do grupo estar ativo.",
+    "Você é poesia sem precisar de rima.",
+    "A Madonna só responde rápido porque é você.",
+    "Nem precisa digitar: sua presença responde tudo.",
+    "Com esse charme, você é atualização premium.",
+    "Você é mais tendência que dancinha no Reels.",
+    "É tanta beleza que deveria cobrar entrada no chat.",
+    "Com você aqui, ninguém presta atenção no resto.",
+    "Você é a Madonna com mais decência.",
+    "Você não brilha, você ofusca com elegância.",
+    "Esse grupo fica 90% mais bonito com você online.",
+    "Se elogio fosse arte, você era galeria.",
+    "Seu bom humor melhora até notificação de cobrança.",
+    "Você é meu bug preferido da realidade.",
+    "Com você, até bug parece charme.",
+    "Você é sinônimo de presença ilustre.",
+    "Se você curte, é porque vale a pena."
 ]
 
 @app.route(f"/{TOKEN}", methods=["POST"])
@@ -156,57 +165,44 @@ def receber_update():
 
 @app.route("/", methods=["GET"])
 def configurar_webhook():
-    url_completa = f"{RENDER_URL}/{TOKEN}"
+    url = f"{RENDER_URL}/{TOKEN}"
     info = bot.get_webhook_info()
-    if info.url != url_completa:
+    if info.url != url:
         bot.remove_webhook()
-        bot.set_webhook(url=url_completa)
-        return "🎤 Madonna acordou, configurou o webhook e tá pronta, amor 💄", 200
-    return "💋 Madonna já está online e fabulosa", 200
+        bot.set_webhook(url=url)
+    return "Webhook configurado com sucesso!", 200
 
 @bot.message_handler(func=lambda msg: True)
-def responder_mensagem(message):
+def responder(message):
     texto = message.text.lower()
-    nome_mencao = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
-    user_id = str(message.from_user.id)
+    nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
+    is_homem = not message.from_user.username or not message.from_user.username.lower().endswith(("a", "i", "y"))  # Simples heurística
+    is_mulher = not is_homem
 
-    if any(x in texto for x in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
-        time.sleep(random.uniform(14, 16))
-        if "bom dia" in texto:
-            resposta = "bom dia 🫦"
-        elif "boa tarde" in texto:
-            resposta = "boa tarde 🫦"
-        elif "boa noite" in texto:
-            resposta = "boa noite 🫦"
-        else:
-            resposta = "boa madrugada 🫦"
-        bot.send_message(message.chat.id, f"{nome_mencao}, {resposta}", parse_mode="Markdown")
+    if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
+        time.sleep(15)
+        saudacao = texto if "bom dia" in texto else texto
+        emoji = "🫦"
+        bot.send_message(message.chat.id, f"{nome}, {saudacao} {emoji}", parse_mode="Markdown")
         return
 
-    time.sleep(random.uniform(14, 16))
+    for chave, respostas in gatilhos_automaticos.items():
+        if all(p in texto for p in chave.split()):
+            time.sleep(15)
+            bot.send_message(message.chat.id, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+            return
 
-    if message.from_user.username and message.from_user.username.startswith("samuel"):
+    if is_homem:
+        frase = frase_nao_usada(insultos_masculinos, "insultos", message.from_user.id)
+        time.sleep(15)
+        bot.send_message(message.chat.id, f"{nome}, {frase}", parse_mode="Markdown")
         return
 
-    if message.from_user.username and message.from_user.username.lower().startswith(("vanessa", "tai", "ana", "jess", "lu", "li", "bia", "cam", "carol", "isa", "fe", "pri", "ju", "yas", "so", "ra", "la", "ma")):
-        usadas = []
-        for dia in historico_elogios.get(user_id, {}):
-            usadas.extend(historico_elogios[user_id][dia])
-        candidatas = [f for f in elogios_mulheres if f not in usadas]
-        if candidatas:
-            frase = random.choice(candidatas)
-            atualizar_historico(HISTORICO_ELOGIOS_PATH, historico_elogios, user_id, frase)
-            bot.send_message(message.chat.id, f"{nome_mencao}, {frase}", parse_mode="Markdown")
+    if is_mulher:
+        frase = frase_nao_usada(elogios_femininos, "elogios", message.from_user.id)
+        time.sleep(15)
+        bot.send_message(message.chat.id, f"{nome}, {frase}", parse_mode="Markdown")
         return
-    else:
-        usadas = []
-        for dia in historico_insultos.get(user_id, {}):
-            usadas.extend(historico_insultos[user_id][dia])
-        candidatas = [f for f in insults_homens if f not in usadas]
-        if candidatas:
-            frase = random.choice(candidatas)
-            atualizar_historico(HISTORICO_INSULTOS_PATH, historico_insultos, user_id, frase)
-            bot.send_message(message.chat.id, f"{nome_mencao}, {frase}", parse_mode="Markdown")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
