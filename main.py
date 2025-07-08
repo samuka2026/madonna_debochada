@@ -131,7 +131,7 @@ def responder_com_estilo(message):
     if not ("madonna" in texto or f"@{bot.get_me().username.lower()}" in texto or any(s in texto for s in boas_maneiras)):
         return
 
-    time.sleep(random.uniform(40, 50))
+    time.sleep(random.uniform(14, 16))
 
     for saudacao, frases in boas_maneiras.items():
         if saudacao in texto:
