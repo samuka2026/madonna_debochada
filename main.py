@@ -389,10 +389,11 @@ def responder_com_estilo(message):
             return
 
     for chave, lista_respostas in respostas_automaticas.items():
-        if chave in texto:
-            resposta = random.choice(lista_respostas)
-            bot.send_message(message.chat.id, f"{nome_usuario}, {resposta}")
-            return
+    palavras_chave = chave.lower().split()
+    if all(p in texto for p in palavras_chave):
+        resposta = random.choice(lista_respostas)
+        bot.send_message(message.chat.id, f"{nome_usuario}, {resposta}")
+        return
 
     reacoes = {
         "❤️": "Ui, me apaixonei agora. Brinca assim não!",
