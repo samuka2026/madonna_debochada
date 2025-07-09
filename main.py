@@ -6,17 +6,14 @@ import time
 import datetime
 import json
 
-# 🔑 Tokens de ambiente
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-# 📁 Caminho do histórico
 HISTORICO_PATH = "historico_respostas.json"
 
-# 📦 Carregar histórico ou iniciar vazio
 try:
     with open(HISTORICO_PATH, "r") as f:
         historico = json.load(f)
@@ -35,13 +32,11 @@ def frase_nao_usada(frases, categoria):
     candidatas = [f for f in frases if f not in usadas]
     frase = random.choice(candidatas or frases)
     historico.setdefault(categoria, {}).setdefault(hoje, []).append(frase)
-    # Mantém só os últimos 3 dias
     dias = sorted(historico[categoria].keys())[-3:]
     historico[categoria] = {d: historico[categoria][d] for d in dias}
     salvar_historico()
     return frase
 
-# ✨ Gatilhos automáticos (editáveis)
 gatilhos_automaticos = {
     "qual seu nome": ["Me chamo Madonna, diva das respostas e rainha do deboche."],
     "você é um robô": ["Sou um upgrade de personalidade, com glitter embutido."],
@@ -56,17 +51,17 @@ gatilhos_automaticos = {
     "manda beijo": ["Beijo enviado com glitter, batom e um pouco de saudade."],
     "te amo": ["Ai, que clichê fofo. Tô quase acreditando."],
     "quem é você": ["Sou aquela que te responde com classe e deboche. A Madonna, querido(a)."],
+    "cadê você": ["Tava me retocando, amor. Diva não aparece de qualquer jeito."],
     "me nota": ["Você já é destaque, meu bem. Só falta brilhar mais."],
     "tá on?": ["Sempre estive. Diva que é diva não dorme, só descansa os olhos."],
     "madonna linda": ["Ai, para... continua!"],
     "madonna chata": ["Chata? Eu sou é necessária!"],
     "bora conversar": ["Só se for agora, mas cuidado com o que deseja."],
     "vai dormir": ["Diva não dorme, recarrega o brilho."],
-    "me responde": ["Calma, flor. Eu sou rápida, mas com classe."]
-    # ➕ Você pode adicionar mais frases aqui!
+    "me responde": ["Calma, flor. Eu sou rápida, mas com classe."],
+    "bom dia madonna": ["Bom dia só pra quem me manda café e carinho! 🫦"]
 }
 
-# 🤬 Insultos masculinos (não repetem por 3 dias)
 insultos_masculinos = [
     "Só pode ser piada vindo de um homem desses.",
     "Você é tão necessário quanto tutorial de como abrir porta.",
@@ -120,7 +115,6 @@ insultos_masculinos = [
     "Pode sair da conversa, já deu sua cota de vergonha."
 ]
 
-# 😍 Elogios femininos (não repetem por 3 dias)
 elogios_femininos = [
     "Com você no grupo, até o Wi-Fi fica mais bonito.",
     "Sua presença ilumina mais que LED no espelho.",
@@ -174,7 +168,6 @@ elogios_femininos = [
     "Se você curte, é porque vale a pena."
 ]
 
-# 🔁 Webhook RENDER
 @app.route(f"/{TOKEN}", methods=["POST"])
 def receber_update():
     update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
@@ -190,65 +183,42 @@ def configurar_webhook():
         bot.set_webhook(url=url)
     return "Webhook configurado com sucesso!", 200
 
-# 🤖 Resposta principal
 @bot.message_handler(func=lambda msg: True)
 def responder(message):
     texto = message.text.lower()
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
-    is_homem = not message.from_user.username or not message.from_user.username.lower().endswith(("a", "i", "y"))
+    username = message.from_user.username or ""
+    is_homem = not username.lower().endswith(("a", "i", "y"))
     is_mulher = not is_homem
 
-    # Saudações SEM necessidade de menção
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
-        time.sleep(15)
         saudacao = "bom dia 🫦" if "bom dia" in texto else \
                    "boa tarde 🫦" if "boa tarde" in texto else \
                    "boa noite 🫦" if "boa noite" in texto else \
                    "boa madrugada 🫦"
-        bot.send_message(
-    message.chat.id,
-    f"{nome}, {frase}",
-    parse_mode="Markdown",
-    reply_to_message_id=message.message_id
-)
+        time.sleep(15)
+        bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
         return
 
-    # Só responde outras se for mencionada
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
         return
 
     time.sleep(15)
 
     for chave, respostas in gatilhos_automaticos.items():
-        if all(p in texto for p in chave.lower().split()):
-            bot.send_message(
-    message.chat.id,
-    f"{nome}, {frase}",
-    parse_mode="Markdown",
-    reply_to_message_id=message.message_id
-)
+        if all(p in texto for p in chave.split()):
+            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
             return
 
     if is_homem:
         frase = frase_nao_usada(insultos_masculinos, "insultos")
-        bot.send_message(
-    message.chat.id,
-    f"{nome}, {frase}",
-    parse_mode="Markdown",
-    reply_to_message_id=message.message_id
-)
+        bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         return
 
     if is_mulher:
         frase = frase_nao_usada(elogios_femininos, "elogios")
-        bot.send_message(
-    message.chat.id,
-    f"{nome}, {frase}",
-    parse_mode="Markdown",
-    reply_to_message_id=message.message_id
-)
+        bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         return
 
-# 🚀 Start local
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
