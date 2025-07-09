@@ -5,6 +5,8 @@ import random
 import time
 import datetime
 import json
+import threading
+import requests
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
@@ -38,6 +40,7 @@ def frase_nao_usada(frases, categoria):
     return frase
 
 gatilhos_automaticos = {
+    # [gatilhos automáticos mantidos]
     "qual seu nome": ["Me chamo Madonna, diva das respostas e rainha do deboche."],
     "você é um robô": ["Sou um upgrade de personalidade, com glitter embutido."],
     "quem é o dono": ["Samuel_gpm é meu dono, meu tudo e meu motivo de existir 💅"],
@@ -62,111 +65,7 @@ gatilhos_automaticos = {
     "bom dia madonna": ["Bom dia só pra quem me manda café e carinho! 🫦"]
 }
 
-insultos_masculinos = [
-    "Só pode ser piada vindo de um homem desses.",
-    "Você é tão necessário quanto tutorial de como abrir porta.",
-    "Com esse papo, nem o Wi-Fi te suporta.",
-    "Homem e opinião: duas coisas que não combinam.",
-    "Você fala e eu só escuto o som do fracasso.",
-    "Tua autoestima é maior que teu senso de ridículo.",
-    "Com essa cara, nem a mãe Natureza te assume.",
-    "Teu charme é igual teu argumento: inexistente.",
-    "Se fosse pra ouvir besteira, eu ligava a TV.",
-    "Fala baixo que tua masculinidade frágil tá tremendo.",
-    "Tu devia ser proibido de digitar sem supervisão.",
-    "Nem com filtro de realidade tu melhorava.",
-    "Você é o bug da Matrix em forma de macho.",
-    "Se fosse bonito, eu ignorava em silêncio.",
-    "Tua presença é mais cansativa que seguidor carente.",
-    "Com esse conteúdo, só falta virar coach.",
-    "Eu pedi atitude, não atrevimento sem graça.",
-    "Se eu tivesse que te levar a sério, surtava.",
-    "Homem tentando causar, é só mais um tropeço.",
-    "Falta luz aí, porque charme não tem.",
-    "Você devia vir com botão de silencioso.",
-    "Poderia tentar ser menos dispensável.",
-    "Você é tipo spoiler: ninguém quer ver, mas aparece.",
-    "Se elegância fosse crime, você era inocente.",
-    "Não é à toa que tá solteiro, né?",
-    "Com esse papo, tu afasta até notificação.",
-    "Tua opinião vale menos que Wi-Fi público.",
-    "Homem que fala demais perde o pouco charme que tem.",
-    "Você parece atualização que estraga o sistema.",
-    "Tua energia me faz querer desligar o grupo.",
-    "Se falta senso, sobra coragem em você.",
-    "Mais perdido que macho em conversa inteligente.",
-    "Você cansa mais que escada sem elevador.",
-    "Teu conteúdo é igual teu cabelo: confuso.",
-    "Você só serve pra teste de paciência.",
-    "Com esse humor, só podia ser homem.",
-    "Vai com calma, o mico tá querendo descanso.",
-    "Tua audácia devia ser estudada.",
-    "Sua autoestima tá desatualizada com a realidade.",
-    "Você é tipo vírus: insiste em aparecer sem ser chamado.",
-    "Mais falso que elogio de macho hétero.",
-    "Tua presença é dispensável até no digital.",
-    "Você tem o carisma de uma senha errada.",
-    "Se fosse filtro, era o de feiura.",
-    "Consegue ser figurante até em grupo mudo.",
-    "Cuidado pra não tropeçar no próprio ego.",
-    "Você é a figurinha repetida do grupo.",
-    "Pena que inteligência não vem em avatar.",
-    "Você é a prova viva do Ctrl+C da mediocridade.",
-    "Pode sair da conversa, já deu sua cota de vergonha."
-]
-
-elogios_femininos = [
-    "Com você no grupo, até o Wi-Fi fica mais bonito.",
-    "Sua presença ilumina mais que LED no espelho.",
-    "Você tem o dom de embelezar até o silêncio.",
-    "Dá vontade de te fixar no topo do grupo.",
-    "Se beleza fosse áudio, você seria o mais ouvido.",
-    "Tua vibe é mais forte que café sem açúcar.",
-    "Tem gente que entra, você encanta.",
-    "Se eu pudesse, colocava moldura nesse charme.",
-    "Você é tipo emoji novo: todo mundo ama.",
-    "Seu bom dia vale mais que muito textão.",
-    "Com esse brilho, até a Madonna respeita.",
-    "A tua beleza é argumento e fim de conversa.",
-    "Você transforma simples em espetáculo.",
-    "Tua presença já é mais que resposta.",
-    "Se você postar, eu curto antes de ver.",
-    "Você é Wi-Fi de 5GHz de tão maravilhosa.",
-    "Fica difícil competir quando você aparece.",
-    "Com essa presença, até a piada perde a graça.",
-    "Você é a notificação que eu sempre quero receber.",
-    "Se sumir, o grupo entra em luto.",
-    "Você é o print favorito do grupo.",
-    "Tem quem tenta, tem você.",
-    "Deusa? Você tá acima da mitologia.",
-    "Teu olhar é mais persuasivo que código de desconto.",
-    "Você é mais doce que direct de crush sincero.",
-    "Com essa postura, até a Madonna senta pra aprender.",
-    "Você tem o dom de deixar a Madonna tímida.",
-    "Você é o filtro que a vida pediu.",
-    "Teu charme é maior que fila de elogios.",
-    "Só de falar contigo já melhora o dia.",
-    "Você não entra no grupo, você reina.",
-    "Com esse nível de beleza, deveria ter selo azul.",
-    "Você deixa até o teclado envergonhado de elogiar.",
-    "Você é a razão do grupo estar ativo.",
-    "Você é poesia sem precisar de rima.",
-    "A Madonna só responde rápido porque é você.",
-    "Nem precisa digitar: sua presença responde tudo.",
-    "Com esse charme, você é atualização premium.",
-    "Você é mais tendência que dancinha no Reels.",
-    "É tanta beleza que deveria cobrar entrada no chat.",
-    "Com você aqui, ninguém presta atenção no resto.",
-    "Você é a Madonna com mais decência.",
-    "Você não brilha, você ofusca com elegância.",
-    "Esse grupo fica 90% mais bonito com você online.",
-    "Se elogio fosse arte, você era galeria.",
-    "Seu bom humor melhora até notificação de cobrança.",
-    "Você é meu bug preferido da realidade.",
-    "Com você, até bug parece charme.",
-    "Você é sinônimo de presença ilustre.",
-    "Se você curte, é porque vale a pena."
-]
+# (mantenha insultos_masculinos e elogios_femininos como estão no seu código atual)
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def receber_update():
@@ -176,12 +75,13 @@ def receber_update():
 
 @app.route("/", methods=["GET"])
 def configurar_webhook():
-    url = f"{RENDER_URL}/{TOKEN}"
+    url_completa = f"{RENDER_URL}/{TOKEN}"
     info = bot.get_webhook_info()
-    if info.url != url:
+    if info.url != url_completa:
         bot.remove_webhook()
-        bot.set_webhook(url=url)
-    return "Webhook configurado com sucesso!", 200
+        bot.set_webhook(url=url_completa)
+        return "✅ Webhook configurado com sucesso!", 200
+    return "✅ Webhook já estava configurado.", 200
 
 @bot.message_handler(func=lambda msg: True)
 def responder(message):
@@ -200,7 +100,6 @@ def responder(message):
         bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
         return
 
-# 💥 BRIGA COM O APOLO
     if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
         if message.from_user.username == "apolo_8bp_bot":
             frases_resposta_apolo = [
@@ -212,7 +111,7 @@ def responder(message):
             ]
             bot.reply_to(message, random.choice(frases_resposta_apolo), parse_mode="Markdown")
             return
-    
+
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
         return
 
@@ -233,15 +132,15 @@ def responder(message):
         bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         return
 
-@app.route("/", methods=["GET"])
-def configurar_webhook():
-    url_completa = f"{RENDER_URL}/{TOKEN}"
-    info = bot.get_webhook_info()
-    if info.url != url_completa:
-        bot.remove_webhook()
-        bot.set_webhook(url=url_completa)
-        return "✅ Webhook configurado com sucesso!", 200
-    return "✅ Webhook já estava configurado.", 200
+# 🟢 Função para manter o bot ativo no Render com ping
+def manter_vivo():
+    while True:
+        try:
+            requests.get(RENDER_URL)
+        except:
+            pass
+        time.sleep(600)  # A cada 10 minutos
 
 if __name__ == "__main__":
+    threading.Thread(target=manter_vivo).start()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
