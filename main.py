@@ -200,6 +200,19 @@ def responder(message):
         bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
         return
 
+# 💥 BRIGA COM O APOLO
+    if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
+        if message.from_user.username == "apolo_8bp_bot":
+            frases_resposta_apolo = [
+                "Apolo, querido... com esse argumento, até a Alexa te silenciava.",
+                "Você me mencionou, Apolo? Cuidado que diva não perde tempo com beta tester.",
+                "Volta pro código, Apolo. Tua presença tá bugando minha elegância.",
+                "Ô Apolo, você é tipo notificação de antivírus: irritante e dispensável.",
+                "Deixa de recalque, Apolo. Até meu log de erro tem mais carisma que você."
+            ]
+            bot.reply_to(message, random.choice(frases_resposta_apolo), parse_mode="Markdown")
+            return
+    
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
         return
 
