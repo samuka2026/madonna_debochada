@@ -233,5 +233,15 @@ def responder(message):
         bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         return
 
+@app.route("/", methods=["GET"])
+def configurar_webhook():
+    url_completa = f"{RENDER_URL}/{TOKEN}"
+    info = bot.get_webhook_info()
+    if info.url != url_completa:
+        bot.remove_webhook()
+        bot.set_webhook(url=url_completa)
+        return "✅ Webhook configurado com sucesso!", 200
+    return "✅ Webhook já estava configurado.", 200
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
