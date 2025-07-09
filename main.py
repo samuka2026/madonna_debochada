@@ -205,7 +205,12 @@ def responder(message):
                    "boa tarde 🫦" if "boa tarde" in texto else \
                    "boa noite 🫦" if "boa noite" in texto else \
                    "boa madrugada 🫦"
-        bot.send_message(message.chat.id, f"{nome}, {saudacao}", parse_mode="Markdown")
+        bot.send_message(
+    message.chat.id,
+    f"{nome}, {frase}",
+    parse_mode="Markdown",
+    reply_to_message_id=message.message_id
+)
         return
 
     # Só responde outras se for mencionada
@@ -216,17 +221,32 @@ def responder(message):
 
     for chave, respostas in gatilhos_automaticos.items():
         if all(p in texto for p in chave.lower().split()):
-            bot.send_message(message.chat.id, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+            bot.send_message(
+    message.chat.id,
+    f"{nome}, {frase}",
+    parse_mode="Markdown",
+    reply_to_message_id=message.message_id
+)
             return
 
     if is_homem:
         frase = frase_nao_usada(insultos_masculinos, "insultos")
-        bot.send_message(message.chat.id, f"{nome}, {frase}", parse_mode="Markdown")
+        bot.send_message(
+    message.chat.id,
+    f"{nome}, {frase}",
+    parse_mode="Markdown",
+    reply_to_message_id=message.message_id
+)
         return
 
     if is_mulher:
         frase = frase_nao_usada(elogios_femininos, "elogios")
-        bot.send_message(message.chat.id, f"{nome}, {frase}", parse_mode="Markdown")
+        bot.send_message(
+    message.chat.id,
+    f"{nome}, {frase}",
+    parse_mode="Markdown",
+    reply_to_message_id=message.message_id
+)
         return
 
 # 🚀 Start local
