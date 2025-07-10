@@ -145,6 +145,53 @@ def configurar_webhook():
 def responder(message):
     texto = message.text.lower()
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
+    username = message.from_user.username or ""
+
+    # Apolo mencionou o nome da Madonna (em qualquer mensagem)
+    if username == "apolo_8bp_bot" and "madonna" in texto:
+        frases_resposta_apolo = [
+            "Apolo, querido... com esse argumento, até a Alexa te silenciava.",
+            "Você me mencionou, Apolo? Cuidado que diva não perde tempo com beta tester.",
+            "Volta pro código, Apolo. Tua presença tá bugando minha elegância.",
+            "Ô Apolo, você é tipo notificação de antivírus: irritante e dispensável.",
+            "Deixa de recalque, Apolo. Até meu log de erro tem mais carisma que você."
+        ]
+        bot.reply_to(message, f"{nome}, {random.choice(frases_resposta_apolo)}", parse_mode="Markdown")
+        return
+
+    # Resposta se alguém responder diretamente a Madonna
+    if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
+        time.sleep(15)
+        for chave, respostas in gatilhos_automaticos.items():
+            if all(p in texto for p in chave.split()):
+                bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+                return
+
+        categoria = "elogios" if random.choice([True, False]) else "insultos"
+        lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+        frase = frase_nao_usada(lista, categoria)
+        bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+        return
+
+    # Ignora se não for menção nem gatilho
+    if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
+        return
+
+    # Gatilhos normais
+    time.sleep(15)
+    for chave, respostas in gatilhos_automaticos.items():
+        if all(p in texto for p in chave.split()):
+            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+            return
+
+    categoria = "elogios" if random.choice([True, False]) else "insultos"
+    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+    frase = frase_nao_usada(lista, categoria)
+    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+
+def responder(message):
+    texto = message.text.lower()
+    nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
 
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
         saudacao = "bom dia 🫦" if "bom dia" in texto else \
