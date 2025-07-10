@@ -40,7 +40,6 @@ def frase_nao_usada(frases, categoria):
     salvar_historico()
     return frase
 
-# === Gatilhos automáticos ===
 gatilhos_automaticos = {
     "qual seu nome": ["Me chamo Madonna, diva das respostas e rainha do deboche."],
     "você é um robô": ["Sou um upgrade de personalidade, com glitter embutido."],
@@ -72,7 +71,6 @@ gatilhos_automaticos = {
     "bom dia madonna": ["Bom dia só pra quem me manda café e carinho! 🫦"]
 }
 
-# === Frases ===
 insultos_masculinos = [
     "Você é tão necessário quanto tutorial de como abrir porta.",
     "Com esse papo, nem o Wi-Fi te suporta.",
@@ -88,7 +86,7 @@ insultos_masculinos = [
     "Você é tipo spoiler: ninguém quer ver, mas aparece.",
     "Se elegância fosse crime, você era inocente.",
     "Com esse papo, tu afasta até notificação.",
-    "Tua opinião vale menos que Wi-Fi público."
+    "Tua opinião vale menos que Wi-Fi público.",
 ]
 
 elogios_femininos = [
@@ -106,7 +104,7 @@ elogios_femininos = [
     "Com essa presença, até a piada perde a graça.",
     "Você é a notificação que eu sempre quero receber.",
     "Você é poesia sem precisar de rima.",
-    "A Madonna só responde rápido porque é você."
+    "A Madonna só responde rápido porque é você.",
 ]
 
 respostas_para_apolo = [
@@ -116,11 +114,6 @@ respostas_para_apolo = [
     "Se você brilhasse metade do que fala, apagava a luz do grupo.",
     "Apolo, teu deboche é tão fraco quanto teu argumento.",
     "Continua, Apolo... tô usando tua audácia como esfoliante.",
-    "Apolo, querido... com esse argumento, até a Alexa te silenciava.",
-    "Você me mencionou, Apolo? Cuidado que diva não perde tempo com beta tester.",
-    "Volta pro código, Apolo. Tua presença tá bugando minha elegância.",
-    "Ô Apolo, você é tipo notificação de antivírus: irritante e dispensável.",
-    "Deixa de recalque, Apolo. Até meu log de erro tem mais carisma que você."
 ]
 
 def brigar_com_apolo():
@@ -154,12 +147,7 @@ def responder(message):
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     username = message.from_user.username or ""
 
-    # Prioridade máxima: Apolo citou "madonna"
-    if username == "apolo_8bp_bot" and "madonna" in texto:
-        bot.reply_to(message, f"{nome}, {random.choice(respostas_para_apolo)}", parse_mode="Markdown")
-        return
-
-    # Saudação automática
+    # Resposta automática para saudações
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
         saudacao = "bom dia 🫦" if "bom dia" in texto else \
                    "boa tarde 🫦" if "boa tarde" in texto else \
@@ -169,10 +157,29 @@ def responder(message):
         bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
         return
 
-    # Resposta a reply direto pra Madonna
+    # Apolo mencionou "madonna" (em qualquer frase)
+    if username == "apolo_8bp_bot" and "madonna" in texto:
+        frases_resposta_apolo = [
+            "Apolo, querido... com esse argumento, até a Alexa te silenciava.",
+            "Você me mencionou, Apolo? Cuidado que diva não perde tempo com beta tester.",
+            "Volta pro código, Apolo. Tua presença tá bugando minha elegância.",
+            "Ô Apolo, você é tipo notificação de antivírus: irritante e dispensável.",
+            "Deixa de recalque, Apolo. Até meu log de erro tem mais carisma que você."
+        ]
+        bot.reply_to(message, f"{nome}, {random.choice(frases_resposta_apolo)}", parse_mode="Markdown")
+        return
+
+    # Alguém respondeu a Madonna
     if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
         if username == "apolo_8bp_bot":
-            bot.reply_to(message, random.choice(respostas_para_apolo), parse_mode="Markdown")
+            frases_resposta_apolo = [
+                "Apolo, querido... com esse argumento, até a Alexa te silenciava.",
+                "Você me mencionou, Apolo? Cuidado que diva não perde tempo com beta tester.",
+                "Volta pro código, Apolo. Tua presença tá bugando minha elegância.",
+                "Ô Apolo, você é tipo notificação de antivírus: irritante e dispensável.",
+                "Deixa de recalque, Apolo. Até meu log de erro tem mais carisma que você."
+            ]
+            bot.reply_to(message, random.choice(frases_resposta_apolo), parse_mode="Markdown")
             return
 
         time.sleep(15)
@@ -187,7 +194,7 @@ def responder(message):
         bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         return
 
-    # Ignorar se não for menção
+    # Ignora se não mencionar a Madonna
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
         return
 
@@ -198,11 +205,50 @@ def responder(message):
             bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
             return
 
-    # Resposta padrão
+    # Resposta aleatória (elogio ou insulto)
     categoria = "elogios" if random.choice([True, False]) else "insultos"
-    lista = elogios_femininos if categoria == "elogios" else insults_masculinos
+    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
     frase = frase_nao_usada(lista, categoria)
     bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+    
+    if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
+        if message.from_user.username == "apolo_8bp_bot":
+            frases_resposta_apolo = [
+                "Apolo, querido... com esse argumento, até a Alexa te silenciava.",
+                "Você me mencionou, Apolo? Cuidado que diva não perde tempo com beta tester.",
+                "Volta pro código, Apolo. Tua presença tá bugando minha elegância.",
+                "Ô Apolo, você é tipo notificação de antivírus: irritante e dispensável.",
+                "Deixa de recalque, Apolo. Até meu log de erro tem mais carisma que você."
+            ]
+            bot.reply_to(message, random.choice(frases_resposta_apolo), parse_mode="Markdown")
+            return
+
+        time.sleep(15)
+        for chave, respostas in gatilhos_automaticos.items():
+            if all(p in texto for p in chave.split()):
+                bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+                return
+
+        categoria = "elogios" if random.choice([True, False]) else "insultos"
+        lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+        frase = frase_nao_usada(lista, categoria)
+        bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+        return
+
+    if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
+        return
+
+    time.sleep(15)
+    for chave, respostas in gatilhos_automaticos.items():
+        if all(p in texto for p in chave.split()):
+            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+            return
+
+    categoria = "elogios" if random.choice([True, False]) else "insultos"
+    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+    frase = frase_nao_usada(lista, categoria)
+    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+    return
 
 def manter_vivo():
     while True:
