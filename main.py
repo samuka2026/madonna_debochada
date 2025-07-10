@@ -109,7 +109,6 @@ def responder(message):
 if message.from_user.username == "apolo_8bp_bot" and "madonna" in texto:
     frase = random.choice(respostas_para_apolo)
     bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
-    return
     salvar_frase_usuario(message.text.strip())
 
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
@@ -119,7 +118,7 @@ if message.from_user.username == "apolo_8bp_bot" and "madonna" in texto:
                    "boa madrugada 🪦"
         time.sleep(15)
         bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
-        return
+    return
 
     if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
         if message.from_user.username == "apolo_8bp_bot":
