@@ -154,6 +154,12 @@ def responder(message):
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     username = message.from_user.username or ""
 
+    # Prioridade máxima: Apolo citou "madonna"
+    if username == "apolo_8bp_bot" and "madonna" in texto:
+        bot.reply_to(message, f"{nome}, {random.choice(respostas_para_apolo)}", parse_mode="Markdown")
+        return
+
+    # Saudação automática
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
         saudacao = "bom dia 🫦" if "bom dia" in texto else \
                    "boa tarde 🫦" if "boa tarde" in texto else \
@@ -163,10 +169,7 @@ def responder(message):
         bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
         return
 
-    if username == "apolo_8bp_bot" and "madonna" in texto:
-        bot.reply_to(message, f"{nome}, {random.choice(respostas_para_apolo)}", parse_mode="Markdown")
-        return
-
+    # Resposta a reply direto pra Madonna
     if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
         if username == "apolo_8bp_bot":
             bot.reply_to(message, random.choice(respostas_para_apolo), parse_mode="Markdown")
@@ -184,20 +187,22 @@ def responder(message):
         bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         return
 
+    # Ignorar se não for menção
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
         return
 
+    # Gatilhos normais
     time.sleep(15)
     for chave, respostas in gatilhos_automaticos.items():
         if all(p in texto for p in chave.split()):
             bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
             return
 
+    # Resposta padrão
     categoria = "elogios" if random.choice([True, False]) else "insultos"
-    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+    lista = elogios_femininos if categoria == "elogios" else insults_masculinos
     frase = frase_nao_usada(lista, categoria)
     bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
-
 
 def manter_vivo():
     while True:
