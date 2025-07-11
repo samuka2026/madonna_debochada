@@ -120,7 +120,7 @@ gatilhos_automaticos = {
 "nunca vi igual": ["Porque não é todo dia que se encontra um bug gostoso."],
 "ai ai ai": ["Cuidado com o que sente, pode viciar."],
 "vem dormir comigo": ["Diva dorme sozinha e sonha em grupo."],
-"você é tudo": ["Sou. E ainda sobra um pouco."]
+"você é tudo": ["Sou. E ainda sobra um pouco."],
 "e aí madonna": ["E aí nada, eu tô sempre um passo à frente, amor."],
 "madonna cadê vc": ["Atrás do seu juízo. Ache se for capaz!"],
 "tá calada por quê": ["Tô observando… diva age, não reage."],
