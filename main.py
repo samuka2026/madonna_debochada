@@ -370,7 +370,7 @@ def aprender_frase(message):
             "texto": message.text
         }
         frases_aprendidas.append(frase)
-        if len(frases_aprendidas) > 5:
+        if len(frases_aprendidas) > 100:
             frases_aprendidas.pop(0)
         with open(FRASES_MEMBROS_PATH, "w") as f:
             json.dump(frases_aprendidas, f)
