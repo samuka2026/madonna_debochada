@@ -15,10 +15,6 @@ GRUPO_ID = -1002363575666  # ID do grupo
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return "Bot Madonna está no ar!"
-
 HISTORICO_PATH = "historico_respostas.json"
 FRASES_MEMBROS_PATH = "frases_membros.json"
 
@@ -223,99 +219,6 @@ gatilhos_automaticos = {
     "vem tomar banho comigo": ["Só se for banho de língua e olhar."],
     "me devora": ["Devora, mas lambe até os limites."],
     "tô com saudade": ["Saudade com vontade, ou só carência com libido?"],
-    "sfd": ["Desse jeito tu vai parar na minha blacklist de desejo."],
-    "safada": ["Eu? Mais que a média nacional, com orgulho."],
-    "mds": ["Se controlar nunca foi meu forte mesmo."],
-    "kkkk": ["Rindo de nervoso ou de tesão mal resolvido?"],
-    "pqp": ["Perdi a linha ou você perdeu a vergonha?"],
-    "oxe": ["Oxente? É o calor ou sou eu te subindo a cabeça?"],
-    "eita": ["Eita nada, amor. Aqui é euforia contínua."],
-    "fala cmg": ["Falo, beijo e te enlouqueço."],
-    "oii": ["Oi? Com esse 'i' extra, já senti segundas intenções."],
-    "ain": ["Gemido disfarçado de timidez."],
-    "nham": ["Vai me comer no papo ou prefere no ato?"],
-    "sdds": ["Saudade no plural é desejo reprimido."],
-    "aff": ["Aff nada, me chama que eu dou conta."],
-    "tô aqui": ["Então se prepara, que aqui eu não perdoo."],
-    "q isso": ["Isso? Isso é charme com veneno, amor."],
-    "sumida": ["Sumida nada, só te evitando de propósito."],
-    "quero vc": ["Quer? Vem buscar com pegada e coragem."],
-    "me nota pfv": ["Notada, marcada e quase sequestrada."],
-    "me come": ["Começa com respeito, termina do jeito que quiser."],
-    "tô de boa": ["De boa até eu pousar no teu pensamento."],
-    "vem me ver": ["Só se tiver vinho, vela e pouca roupa."],
-    "pode vir": ["Só se tiver onde deitar depois."],
-    "vem logo": ["Tô chegando igual furacão com batom borrado."],
-    "me quebra": ["Quebro, rebolo e ainda te monto de volta."],
-    "chega mais": ["Cheguei, e trouxe caos com mel."],
-    "tô fraca": ["Fraca nada, só carregando fogo disfarçado."],
-    "me ajuda": ["Ajudo a perder a linha."],
-    "preciso de vc": ["Você precisa é de terapia depois de mim."],
-    "vem ser meu": ["Sou só de quem me arranca suspiros e lençóis."],
-    "quero colo": ["Te dou colo, beijo e tapa, tudo junto."],
-    "só observo": ["Observa muito e age pouco, hein?"],
-    "manda áudio": ["Áudio? Só se for gemido narrado."],
-    "me respondeee": ["Calma! Diva responde com delay e intensidade."],
-    "sem condições": ["Condições nenhuma. Aqui é instinto e caos."],
-    "me chama": ["Chamando na língua que tu entende: safadeza pura."],
-    "me provoca": ["Te provoco até você me pedir arrego."],
-    "me segura": ["Segura não, me solta que eu me garanto."],
-    "tô off": ["Off pra quem? Aqui a libido é 24h."],
-    "mdc": ["Misericórdia? Nem a igreja aguenta esse fogo."],
-    "só observo": ["Observa não, age logo que eu tô no ponto."],
-    "vou chorar": ["Chora não, chupa esse drama com gosto."],
-    "fala sério": ["Sério? Aqui só se for safadeza com argumento."],
-    "me ganha": ["Te ganho, te uso e te deixo viciado(a)."],
-    "me ensina": ["Te ensino como perder o juízo com estilo."],
-    "tô ferrado": ["Ferrado? Vem que eu boto tua alma no spa do pecado."],
-    "me leva": ["Levo, mas só se for no ritmo do meu rebolado."],
-    "só vc msm": ["É... só eu pra causar esse tumulto emocional."],
-    "me pega": ["Te pego de jeito, sem tutorial."],
-    "tô entregue": ["Entregue? Então assina a cláusula da perdição."],
-    "tá quente": ["Mais que o grupo, só minha programação."],
-    "me marca": ["Marcada tá. Agora aguenta as consequências."],
-    "tem dono?": ["Dona de mim mesma. Quer se candidatar?"],
-    "sai fora": ["Saio não. Já aluguei um duplex na tua mente."],
-    "fiquei com vergonha": ["Vergonha é não me responder com beijo."],
-    "vem ni mim": ["Tô indo de lingerie e sarcasmo."],
-    "se controla": ["Se eu me controlar, você surta de saudade."],
-    "quero mais": ["Mais? Então aguenta o nível dois."],
-    "me esquece": ["Esqueço não. Tenho arquivo teu salvo em desejo."],
-    "me leva pra casa": ["Levo pra casa, pro chão, pro teto…"],
-    "tá on?": ["On, safada e com bateria infinita."],
-    "só falta você": ["Falta eu e umas ideias indecentes."],
-    "vem quente": ["Tô fervendo, pega com luva térmica."],
-    "me escuta": ["Escuto até tua respiração acelerar."],
-    "tô pegando fogo": ["Fogo? Então me usa de extintor sensual."],
-    "vem aqui": ["Cheguei. De salto, batom e problema nos olhos."],
-    "safadinha": ["Só na superfície. Profundidade é outra história."],
-    "tô com fogo": ["Então solta a faísca e vamos explodir juntos."],
-    "vem brincar": ["Brincar? Só se for de esconde e mostra."],
-    "vc me quer?": ["Quero. Mas vai aguentar?"],
-    "senta aqui": ["Sento, deslizo e ainda te corrijo a postura."],
-    "te espero": ["Me espera deitado, que eu chego causando."],
-    "me atiça": ["Atico, mexo, derrubo e reanimo."],
-    "vem cuidar de mim": ["Cuido. Mas cobro com juros emocionais."],
-    "vem se perder": ["Perder contigo é minha programação preferida."],
-    "vc é demais": ["Demais e meio indecente, confesso."],
-    "de onde saiu?": ["Saí do teu algoritmo de desejos."],
-    "tô nervoso": ["Nervoso? Vem descarregar comigo."],
-    "vem que tô facinha": ["Facinha? Eu sou o desbloqueio da tua paz."],
-    "me olha": ["Tô olhando até teu histórico."],
-    "olha isso": ["Olhei. Agora me mostra de novo que gostei."],
-    "vc n presta": ["Prestar? Eu sou a falha do sistema com estilo."],
-    "me surra": ["Só se for com beijos e tapas alternados."],
-    "me chama de linda": ["Linda, gostosa e quase ilegal."],
-    "me deixa louco": ["Louco? Te deixo insano e ainda sorrindo."],
-    "vem com força": ["Força eu tenho, resistência é que falta em você."],
-    "me ama ainda?": ["Te amo, te uso e te refaço."],
-    "tô caidinha": ["Caidinha nada, você mergulhou de cabeça."],
-    "tô doida": ["Louca? Então senta aqui e me escuta com calma."],
-    "me chama de princesa": ["Princesa? Só se for das trevas e do desejo."],
-    "sou teu fã": ["Fã? Vira devoto então, que aqui é seita."],
-    "cheguei": ["Chegou? Agora aguenta meu impacto sensual."],
-    "bora ali": ["Ali? Só se for sem roupa e com planos indecentes."],
-    "deita aqui": ["Deito, rolo e ainda te deixo flutuando."],   
 }
 
 insultos_masculinos = [
@@ -467,7 +370,7 @@ def aprender_frase(message):
             "texto": message.text
         }
         frases_aprendidas.append(frase)
-        if len(frases_aprendidas) > 100:
+        if len(frases_aprendidas) > 50:
             frases_aprendidas.pop(0)
         with open(FRASES_MEMBROS_PATH, "w") as f:
             json.dump(frases_aprendidas, f)
@@ -475,53 +378,38 @@ def aprender_frase(message):
 def repetir_frase():
     while True:
         try:
-            time.sleep(1800)  # 30 minutos
+            time.sleep(3000)
             if frases_aprendidas:
                 frase = random.choice(frases_aprendidas)
                 texto = frase["texto"]
-                bot.send_message(GRUPO_ID, texto)
-                frases_aprendidas.remove(frase)
-                with open(FRASES_MEMBROS_PATH, "w") as f:
-                    json.dump(frases_aprendidas, f)
+                nome = frase["nome"]
+                bot.send_message(GRUPO_ID, f"ja dizia {nome}: \"{texto} ✍🏻💋💄\"")
         except Exception as e:
-            print(f"[ERRO AO REPETIR FRASE] {e}")
+            print(f"Erro ao repetir frase aprendida: {e}")
 
-@bot.message_handler(func=lambda message: True)
+@app.route(f"/{TOKEN}", methods=["POST"])
+def receber_update():
+    update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
+    bot.process_new_updates([update])
+    return "ok", 200
+
+@app.route("/", methods=["GET"])
+def configurar_webhook():
+    url_completa = f"{RENDER_URL}/{TOKEN}"
+    info = bot.get_webhook_info()
+    if info.url != url_completa:
+        bot.remove_webhook()
+        bot.set_webhook(url=url_completa)
+        return "✅ Webhook configurado com sucesso!", 200
+    return "✅ Webhook já estava configurado.", 200
+
+@bot.message_handler(func=lambda msg: True)
 def responder(message):
+    texto = message.text.lower() if message.text else ""
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     username = message.from_user.username or ""
-    texto = message.text.lower() if message.text else ""
 
-    if message.photo:
-        file_id = message.photo[-1].file_id
-        time.sleep(15)
-        bot.send_photo(message.chat.id, file_id, caption=f"{nome}, aí vai sua foto!", parse_mode="Markdown")
-        return
-
-    if message.audio:
-        file_id = message.audio.file_id
-        time.sleep(15)
-        bot.send_audio(message.chat.id, file_id, caption=f"{nome}, aí vai seu áudio!", parse_mode="Markdown")
-        return
-
-    if message.sticker:
-        file_id = message.sticker.file_id
-        time.sleep(15)
-        bot.send_sticker(message.chat.id, file_id)
-        return
-
-    if message.video:
-        file_id = message.video.file_id
-        time.sleep(15)
-        bot.send_video(message.chat.id, file_id, caption=f"{nome}, aí vai seu vídeo!", parse_mode="Markdown")
-        return
-
-    if message.document:
-        file_id = message.document.file_id
-        time.sleep(15)
-        bot.send_document(message.chat.id, file_id, caption=f"{nome}, aí vai seu documento!", parse_mode="Markdown")
-        return
-
+    # Resposta para saudações (bom dia, boa tarde, boa noite, boa madrugada)
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
         saudacao = "bom dia meu bem 💋" if "bom dia" in texto else \
                    "boa tarde meu bem 💋" if "boa tarde" in texto else \
@@ -532,10 +420,12 @@ def responder(message):
         aprender_frase(message)
         return
 
+    # Resposta específica para o Apolo
     if username == "apolo_8bp_bot" and "madonna" in texto:
         bot.reply_to(message, f"{nome}, {random.choice(respostas_para_apolo)}", parse_mode="Markdown")
         return
 
+    # Se a mensagem é resposta a uma mensagem da Madonna
     if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
         if username == "apolo_8bp_bot":
             bot.reply_to(message, random.choice(respostas_para_apolo), parse_mode="Markdown")
@@ -543,17 +433,40 @@ def responder(message):
 
         time.sleep(15)
         for chave, respostas in gatilhos_automaticos.items():
+            # Verifica se todas as palavras da chave aparecem no texto, mesmo fora de ordem
             if all(p in texto for p in chave.split()):
                 bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
                 aprender_frase(message)
                 return
 
-        categoria = random.choice(["elogios", "insultos"])
-        lista_total = elogios_femininos + insultos_masculinos
-        frase = frase_nao_usada(lista_total, categoria)
+        # Se não encontrou gatilho, responde com elogio ou insulto
+        categoria = "elogios" if random.choice([True, False]) else "insultos"
+        lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+        frase = frase_nao_usada(lista, categoria)
         bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         aprender_frase(message)
         return
+
+    # Se mensagem não menciona Madonna (nem com @), apenas aprende a frase
+    if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
+        aprender_frase(message)
+        return
+
+    # Para mensagens que mencionam Madonna diretamente (com @ ou texto)
+    time.sleep(15)
+    for chave, respostas in gatilhos_automaticos.items():
+        if all(p in texto for p in chave.split()):
+            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+            aprender_frase(message)
+            return
+
+    # Caso nenhum gatilho, responde com elogio ou insulto
+    categoria = "elogios" if random.choice([True, False]) else "insultos"
+    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+    frase = frase_nao_usada(lista, categoria)
+    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+    aprender_frase(message)
+    return
 
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
         aprender_frase(message)
@@ -580,26 +493,8 @@ def manter_vivo():
             pass
         time.sleep(600)
 
-from flask import Flask, request
-import telebot
-
-API_TOKEN = '8044550839:AAGV0EieTKDcoymHZz6ftb-qwLCD02uBKJk'
-
-bot = telebot.TeleBot(API_TOKEN)
-app = Flask(__name__)
-
-@app.route(f'/{API_TOKEN}', methods=['POST'])
-def webhook():
-    json_str = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_str)
-    bot.process_new_updates([update])
-    return '', 200
-
-@app.route('/', methods=['GET'])
-def index():
-    return 'Madonna tá viva e debochada! 💋', 200
-
-if __name__ == '__main__':
-    bot.remove_webhook()
-    bot.set_webhook(url=f'https://madonna-debochada.onrender.com/{API_TOKEN}')
-    app.run(host='0.0.0.0', port=10000)
+if __name__ == "__main__":
+    threading.Thread(target=manter_vivo).start()
+    threading.Thread(target=brigar_com_apolo).start()
+    threading.Thread(target=repetir_frase).start()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
