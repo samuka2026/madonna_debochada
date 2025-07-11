@@ -292,7 +292,7 @@ gatilhos_automaticos = {
     "tô me tocando pensando em você": ["Continua, que tô sentindo daqui."],
     "me hipnotiza": ["Só de olhar, tu já perde o chão."],
     "vem com tua boca": ["Minha boca fala e geme com poesia."],
-    "me leva pro inferno": ["Mas com direi],
+    "me leva pro inferno": ["Mas com direi"],
     "DLC": ["Delícia é pouco pra você... você tá mais pra sobremesa proibida 🍓"],
     "SFD": ["Safada? E ainda com certificado digital."],
     "TQR": ["Te quero nua de juízo e vestida de intenção."],
