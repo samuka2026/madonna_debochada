@@ -133,7 +133,7 @@ def repetir_frase():
                 frase = random.choice(frases_aprendidas)
                 texto = frase["texto"]
                 nome = frase["nome"]
-                bot.send_message(GRUPO_ID, f"ja dizia {nome}: \"{texto} 😴\"")
+                bot.send_message(GRUPO_ID, f"ja dizia {nome}: \"{texto} ✍🏻💋💄\"")
         except Exception as e:
             print(f"Erro ao repetir frase aprendida: {e}")
 
