@@ -580,8 +580,26 @@ def manter_vivo():
             pass
         time.sleep(600)
 
-if __name__ == "__main__":
-    threading.Thread(target=manter_vivo).start()
-    threading.Thread(target=brigar_com_apolo).start()
-    threading.Thread(target=repetir_frase).start()
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+from flask import Flask, request
+import telebot
+
+API_TOKEN = '8044550839:AAGV0EieTKDcoymHZz6ftb-qwLCD02uBKJk'
+
+bot = telebot.TeleBot(API_TOKEN)
+app = Flask(__name__)
+
+@app.route(f'/{API_TOKEN}', methods=['POST'])
+def webhook():
+    json_str = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_str)
+    bot.process_new_updates([update])
+    return '', 200
+
+@app.route('/', methods=['GET'])
+def index():
+    return 'Madonna tá viva e debochada! 💋', 200
+
+if __name__ == '__main__':
+    bot.remove_webhook()
+    bot.set_webhook(url=f'https://madonna-debochada.onrender.com/{API_TOKEN}')
+    app.run(host='0.0.0.0', port=10000)
