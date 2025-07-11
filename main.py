@@ -378,10 +378,19 @@ def aprender_frase(message):
 def repetir_frase():
     while True:
         try:
-            time.sleep(3000)
+            time.sleep(1800)  # 30 minutos
+
             if frases_aprendidas:
                 frase = random.choice(frases_aprendidas)
                 texto = frase["texto"]
+                bot.send_message(ID_GRUPO, texto)
+                frases_aprendidas.remove(frase)
+
+                with open(FRASES_MEMBROS_PATH, "w") as f:
+                    json.dump(frases_aprendidas, f)
+
+        except Exception as e:
+            print(f"[ERRO AO REPETIR FRASE] {e}")
          
 @bot.message_handler(func=lambda message: True)
 def responder(message):
