@@ -451,9 +451,9 @@ def responder(message):
                 aprender_frase(message)
                 return
 
-        categoria = "elogios" if random.choice([True, False]) else "insultos"
-        lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
-        frase = frase_nao_usada(lista, categoria)
+        categoria = random.choice(["elogios", "insultos"])
+        lista_total = elogios_femininos + insultos_masculinos
+        frase = frase_nao_usada(lista_total, categoria)
         bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         aprender_frase(message)
         return
