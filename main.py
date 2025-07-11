@@ -378,64 +378,53 @@ def aprender_frase(message):
 def repetir_frase():
     while True:
         try:
-            time.sleep(600)  # 10 minutos
-
+            time.sleep(1800)  # 30 minutos
             if frases_aprendidas:
                 frase = random.choice(frases_aprendidas)
                 texto = frase["texto"]
                 bot.send_message(GRUPO_ID, texto)
                 frases_aprendidas.remove(frase)
-
                 with open(FRASES_MEMBROS_PATH, "w") as f:
                     json.dump(frases_aprendidas, f)
-
         except Exception as e:
             print(f"[ERRO AO REPETIR FRASE] {e}")
-         
+
 @bot.message_handler(func=lambda message: True)
 def responder(message):
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     username = message.from_user.username or ""
     texto = message.text.lower() if message.text else ""
 
-    # Repetir foto
     if message.photo:
         file_id = message.photo[-1].file_id
         time.sleep(15)
         bot.send_photo(message.chat.id, file_id, caption=f"{nome}, aí vai sua foto!", parse_mode="Markdown")
         return
 
-    # Repetir áudio
     if message.audio:
         file_id = message.audio.file_id
         time.sleep(15)
         bot.send_audio(message.chat.id, file_id, caption=f"{nome}, aí vai seu áudio!", parse_mode="Markdown")
         return
 
-    # Repetir figurinha (sticker)
     if message.sticker:
         file_id = message.sticker.file_id
         time.sleep(15)
         bot.send_sticker(message.chat.id, file_id)
         return
 
-    # Repetir vídeo
     if message.video:
         file_id = message.video.file_id
         time.sleep(15)
         bot.send_video(message.chat.id, file_id, caption=f"{nome}, aí vai seu vídeo!", parse_mode="Markdown")
         return
 
-    # Repetir documento
     if message.document:
         file_id = message.document.file_id
         time.sleep(15)
         bot.send_document(message.chat.id, file_id, caption=f"{nome}, aí vai seu documento!", parse_mode="Markdown")
         return
 
-    # --- A partir daqui é sua lógica original para mensagens de texto ---
-    
-    # Resposta para saudações (bom dia, boa tarde, boa noite, boa madrugada)
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
         saudacao = "bom dia meu bem 💋" if "bom dia" in texto else \
                    "boa tarde meu bem 💋" if "boa tarde" in texto else \
@@ -446,12 +435,10 @@ def responder(message):
         aprender_frase(message)
         return
 
-    # Resposta específica para o Apolo
     if username == "apolo_8bp_bot" and "madonna" in texto:
         bot.reply_to(message, f"{nome}, {random.choice(respostas_para_apolo)}", parse_mode="Markdown")
         return
 
-    # Se a mensagem é resposta a uma mensagem da Madonna
     if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
         if username == "apolo_8bp_bot":
             bot.reply_to(message, random.choice(respostas_para_apolo), parse_mode="Markdown")
@@ -471,12 +458,10 @@ def responder(message):
         aprender_frase(message)
         return
 
-    # Se mensagem não menciona Madonna (nem com @), apenas aprende a frase
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
         aprender_frase(message)
         return
 
-    # Para mensagens que mencionam Madonna diretamente (com @ ou texto)
     time.sleep(15)
     for chave, respostas in gatilhos_automaticos.items():
         if all(p in texto for p in chave.split()):
