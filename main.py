@@ -15,6 +15,10 @@ GRUPO_ID = -1002363575666  # ID do grupo
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
+@app.route("/")
+def home():
+    return "Bot Madonna está no ar!"
+
 HISTORICO_PATH = "historico_respostas.json"
 FRASES_MEMBROS_PATH = "frases_membros.json"
 
