@@ -383,7 +383,7 @@ def repetir_frase():
             if frases_aprendidas:
                 frase = random.choice(frases_aprendidas)
                 texto = frase["texto"]
-                bot.send_message(ID_GRUPO, texto)
+                bot.send_message(GRUPO_ID, texto)
                 frases_aprendidas.remove(frase)
 
                 with open(FRASES_MEMBROS_PATH, "w") as f:
