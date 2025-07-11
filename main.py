@@ -16,6 +16,7 @@ bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
 HISTORICO_PATH = "historico_respostas.json"
+FRASES_MEMBROS_PATH = "frases_membros.json"
 
 try:
     with open(HISTORICO_PATH, "r") as f:
@@ -58,79 +59,83 @@ gatilhos_automaticos = {
     "cadê a braba": ["Tá montando o rifle de precisão pra eliminar você. Foge maluco!"],
     "manda beijo": ["Beijo enviado com glitter, batom e um pouco de saudade."],
     "te amo": ["Ai, que clichê fofo. Tô quase acreditando."],
-    "alguém vivo": ["Sim. Mas no momento estão coisando, silencio!🫦"],
+    "alguém vivo": ["Sim. Mas no momento estão coisando, silencio!🪦"],
     "quem é você": ["Sou aquela que te responde com classe e deboche. A Madonna, querido(a)."],
     "cadê você": ["Tava me retocando, amor. Diva não aparece de qualquer jeito."],
     "me nota": ["Você já é destaque, meu bem. Só falta brilhar mais."],
     "tá on?": ["Sempre estive. Diva que é diva não dorme, só descansa os olhos."],
     "madonna linda": ["Ai, para... continua!"],
-    "quem manda aqui?": ["Claro que é o nosso chefinho Samuka 🫦"],
+    "quem manda aqui?": ["Claro que é o nosso chefinho Samuka 🪦"],
     "madonna chata": ["Chata? Eu sou é necessária!"],
     "bora conversar": ["Só se for agora, mas cuidado com o que deseja."],
     "vai dormir": ["Diva não dorme, recarrega o brilho."],
     "me responde": ["Calma, flor. Eu sou rápida, mas com classe."],
-    "bom dia madonna": ["Bom dia só pra quem me manda café e carinho! 🫦"]
+    "bom dia madonna": ["Bom dia só pra quem me manda café e carinho! 🪦"]
 }
 
-# === Frases ===
 insultos_masculinos = [
     "Você é tão necessário quanto tutorial de como abrir porta.",
     "Com esse papo, nem o Wi-Fi te suporta.",
     "Homem e opinião: duas coisas que não combinam.",
-    "Você fala e eu só escuto o som do fracasso.",
-    "Teu charme é igual teu argumento: inexistente.",
-    "Se fosse pra ouvir besteira, eu ligava a TV.",
-    "Tua presença é mais cansativa que seguidor carente.",
-    "Com esse conteúdo, só falta virar coach.",
-    "Homem tentando causar, é só mais um tropeço.",
-    "Você devia vir com botão de silencioso.",
-    "Poderia tentar ser menos dispensável.",
-    "Você é tipo spoiler: ninguém quer ver, mas aparece.",
-    "Se elegância fosse crime, você era inocente.",
-    "Com esse papo, tu afasta até notificação.",
-    "Tua opinião vale menos que Wi-Fi público."
+    # ...
 ]
 
 elogios_femininos = [
     "Com você no grupo, até o Wi-Fi fica mais bonito.",
     "Sua presença ilumina mais que LED no espelho.",
     "Você tem o dom de embelezar até o silêncio.",
-    "Dá vontade de te fixar no topo do grupo.",
-    "Se beleza fosse áudio, você seria o mais ouvido.",
-    "Tua vibe é mais forte que café sem açúcar.",
-    "Se eu pudesse, colocava moldura nesse charme.",
-    "Você é tipo emoji novo: todo mundo ama.",
-    "Com esse brilho, até a Madonna respeita.",
-    "Você transforma simples em espetáculo.",
-    "Você é Wi-Fi de 5GHz de tão maravilhosa.",
-    "Com essa presença, até a piada perde a graça.",
-    "Você é a notificação que eu sempre quero receber.",
-    "Você é poesia sem precisar de rima.",
-    "A Madonna só responde rápido porque é você."
+    # ...
 ]
 
 respostas_para_apolo = [
     "Apolo, me esquece. Vai ler um dicionário de bom senso.",
     "Ai Apolo... tua tentativa de me afrontar é quase fofa.",
-    "Você é o motivo do grupo precisar de moderação, Apolo.",
-    "Se você brilhasse metade do que fala, apagava a luz do grupo.",
-    "Apolo, teu deboche é tão fraco quanto teu argumento.",
-    "Continua, Apolo... tô usando tua audácia como esfoliante.",
-    "Apolo, querido... com esse argumento, até a Alexa te silenciava.",
-    "Você me mencionou, Apolo? Cuidado que diva não perde tempo com beta tester.",
-    "Volta pro código, Apolo. Tua presença tá bugando minha elegância.",
-    "Ô Apolo, você é tipo notificação de antivírus: irritante e dispensável.",
-    "Deixa de recalque, Apolo. Até meu log de erro tem mais carisma que você."
+    # ...
 ]
 
 def brigar_com_apolo():
     while True:
         try:
-            time.sleep(3600)
+            time.sleep(72000)  # 20 horas
             frase = random.choice(respostas_para_apolo)
             bot.send_message(GRUPO_ID, f"@apolo_8bp_bot {frase}")
         except Exception as e:
             print(f"Erro ao brigar com Apolo: {e}")
+
+# === Frases aprendidas ===
+frases_aprendidas = []
+
+try:
+    with open(FRASES_MEMBROS_PATH, "r") as f:
+        frases_aprendidas = json.load(f)
+except:
+    frases_aprendidas = []
+
+def aprender_frase(message):
+    if message.chat.id != GRUPO_ID:
+        return
+    if message.text and len(message.text) > 10:
+        frase = {
+            "nome": message.from_user.first_name,
+            "texto": message.text
+        }
+        frases_aprendidas.append(frase)
+        if len(frases_aprendidas) > 50:
+            frases_aprendidas.pop(0)
+        with open(FRASES_MEMBROS_PATH, "w") as f:
+            json.dump(frases_aprendidas, f)
+
+def repetir_frase():
+    while True:
+        try:
+            time.sleep(1800)
+            if frases_aprendidas:
+                frase = random.choice(frases_aprendidas)
+                texto = frase["texto"]
+                nome = frase["nome"]
+                bot.send_message(GRUPO_ID, f"ja dizia {nome}: \"{texto} 😴\"")
+        except Exception as e:
+            print(f"Erro ao repetir frase aprendida: {e}")
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def receber_update():
@@ -150,17 +155,18 @@ def configurar_webhook():
 
 @bot.message_handler(func=lambda msg: True)
 def responder(message):
-    texto = message.text.lower()
+    texto = message.text.lower() if message.text else ""
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     username = message.from_user.username or ""
 
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
-        saudacao = "bom dia 🫦" if "bom dia" in texto else \
-                   "boa tarde 🫦" if "boa tarde" in texto else \
-                   "boa noite 🫦" if "boa noite" in texto else \
-                   "boa madrugada 🫦"
+        saudacao = "bom dia 🪦" if "bom dia" in texto else \
+                   "boa tarde 🪦" if "boa tarde" in texto else \
+                   "boa noite 🪦" if "boa noite" in texto else \
+                   "boa madrugada 🪦"
         time.sleep(15)
         bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
+        aprender_frase(message)
         return
 
     if username == "apolo_8bp_bot" and "madonna" in texto:
@@ -176,28 +182,32 @@ def responder(message):
         for chave, respostas in gatilhos_automaticos.items():
             if all(p in texto for p in chave.split()):
                 bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+                aprender_frase(message)
                 return
 
         categoria = "elogios" if random.choice([True, False]) else "insultos"
         lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
         frase = frase_nao_usada(lista, categoria)
         bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+        aprender_frase(message)
         return
 
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
+        aprender_frase(message)
         return
 
     time.sleep(15)
     for chave, respostas in gatilhos_automaticos.items():
         if all(p in texto for p in chave.split()):
             bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+            aprender_frase(message)
             return
 
     categoria = "elogios" if random.choice([True, False]) else "insultos"
     lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
     frase = frase_nao_usada(lista, categoria)
     bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
-
+    aprender_frase(message)
 
 def manter_vivo():
     while True:
@@ -210,4 +220,5 @@ def manter_vivo():
 if __name__ == "__main__":
     threading.Thread(target=manter_vivo).start()
     threading.Thread(target=brigar_com_apolo).start()
+    threading.Thread(target=repetir_frase).start()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
