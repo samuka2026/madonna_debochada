@@ -382,33 +382,50 @@ def repetir_frase():
             if frases_aprendidas:
                 frase = random.choice(frases_aprendidas)
                 texto = frase["texto"]
-                nome = frase["nome"]
-                bot.send_message(GRUPO_ID, f"ja dizia {nome}: \"{texto} ✍🏻💋💄\"")
-        except Exception as e:
-            print(f"Erro ao repetir frase aprendida: {e}")
-
-@app.route(f"/{TOKEN}", methods=["POST"])
-def receber_update():
-    update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
-    bot.process_new_updates([update])
-    return "ok", 200
-
-@app.route("/", methods=["GET"])
-def configurar_webhook():
-    url_completa = f"{RENDER_URL}/{TOKEN}"
-    info = bot.get_webhook_info()
-    if info.url != url_completa:
-        bot.remove_webhook()
-        bot.set_webhook(url=url_completa)
-        return "✅ Webhook configurado com sucesso!", 200
-    return "✅ Webhook já estava configurado.", 200
-
-@bot.message_handler(func=lambda msg: True)
+         
+@bot.message_handler(func=lambda message: True)
 def responder(message):
-    texto = message.text.lower() if message.text else ""
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     username = message.from_user.username or ""
+    texto = message.text.lower() if message.text else ""
 
+    # Repetir foto
+    if message.photo:
+        file_id = message.photo[-1].file_id
+        time.sleep(15)
+        bot.send_photo(message.chat.id, file_id, caption=f"{nome}, aí vai sua foto!", parse_mode="Markdown")
+        return
+
+    # Repetir áudio
+    if message.audio:
+        file_id = message.audio.file_id
+        time.sleep(15)
+        bot.send_audio(message.chat.id, file_id, caption=f"{nome}, aí vai seu áudio!", parse_mode="Markdown")
+        return
+
+    # Repetir figurinha (sticker)
+    if message.sticker:
+        file_id = message.sticker.file_id
+        time.sleep(15)
+        bot.send_sticker(message.chat.id, file_id)
+        return
+
+    # Repetir vídeo
+    if message.video:
+        file_id = message.video.file_id
+        time.sleep(15)
+        bot.send_video(message.chat.id, file_id, caption=f"{nome}, aí vai seu vídeo!", parse_mode="Markdown")
+        return
+
+    # Repetir documento
+    if message.document:
+        file_id = message.document.file_id
+        time.sleep(15)
+        bot.send_document(message.chat.id, file_id, caption=f"{nome}, aí vai seu documento!", parse_mode="Markdown")
+        return
+
+    # --- A partir daqui é sua lógica original para mensagens de texto ---
+    
     # Resposta para saudações (bom dia, boa tarde, boa noite, boa madrugada)
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
         saudacao = "bom dia meu bem 💋" if "bom dia" in texto else \
@@ -433,13 +450,11 @@ def responder(message):
 
         time.sleep(15)
         for chave, respostas in gatilhos_automaticos.items():
-            # Verifica se todas as palavras da chave aparecem no texto, mesmo fora de ordem
             if all(p in texto for p in chave.split()):
                 bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
                 aprender_frase(message)
                 return
 
-        # Se não encontrou gatilho, responde com elogio ou insulto
         categoria = "elogios" if random.choice([True, False]) else "insultos"
         lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
         frase = frase_nao_usada(lista, categoria)
@@ -453,25 +468,6 @@ def responder(message):
         return
 
     # Para mensagens que mencionam Madonna diretamente (com @ ou texto)
-    time.sleep(15)
-    for chave, respostas in gatilhos_automaticos.items():
-        if all(p in texto for p in chave.split()):
-            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
-            aprender_frase(message)
-            return
-
-    # Caso nenhum gatilho, responde com elogio ou insulto
-    categoria = "elogios" if random.choice([True, False]) else "insultos"
-    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
-    frase = frase_nao_usada(lista, categoria)
-    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
-    aprender_frase(message)
-    return
-
-    if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
-        aprender_frase(message)
-        return
-
     time.sleep(15)
     for chave, respostas in gatilhos_automaticos.items():
         if all(p in texto for p in chave.split()):
