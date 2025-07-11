@@ -370,7 +370,7 @@ def aprender_frase(message):
             "texto": message.text
         }
         frases_aprendidas.append(frase)
-        if len(frases_aprendidas) > 50:
+        if len(frases_aprendidas) > 5:
             frases_aprendidas.pop(0)
         with open(FRASES_MEMBROS_PATH, "w") as f:
             json.dump(frases_aprendidas, f)
@@ -378,7 +378,7 @@ def aprender_frase(message):
 def repetir_frase():
     while True:
         try:
-            time.sleep(1800)  # 30 minutos
+            time.sleep(600)  # 10 minutos
 
             if frases_aprendidas:
                 frase = random.choice(frases_aprendidas)
