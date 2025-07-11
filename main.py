@@ -409,6 +409,7 @@ def responder(message):
     nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     username = message.from_user.username or ""
 
+    # Resposta para saudações (bom dia, boa tarde, boa noite, boa madrugada)
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
         saudacao = "bom dia meu bem 💋" if "bom dia" in texto else \
                    "boa tarde meu bem 💋" if "boa tarde" in texto else \
@@ -419,10 +420,12 @@ def responder(message):
         aprender_frase(message)
         return
 
+    # Resposta específica para o Apolo
     if username == "apolo_8bp_bot" and "madonna" in texto:
         bot.reply_to(message, f"{nome}, {random.choice(respostas_para_apolo)}", parse_mode="Markdown")
         return
 
+    # Se a mensagem é resposta a uma mensagem da Madonna
     if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
         if username == "apolo_8bp_bot":
             bot.reply_to(message, random.choice(respostas_para_apolo), parse_mode="Markdown")
@@ -430,16 +433,39 @@ def responder(message):
 
         time.sleep(15)
         for chave, respostas in gatilhos_automaticos.items():
+            # Verifica se todas as palavras da chave aparecem no texto, mesmo fora de ordem
             if all(p in texto for p in chave.split()):
                 bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
                 aprender_frase(message)
                 return
 
+        # Se não encontrou gatilho, responde com elogio ou insulto
         categoria = "elogios" if random.choice([True, False]) else "insultos"
         lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
         frase = frase_nao_usada(lista, categoria)
         bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
         aprender_frase(message)
+        return
+
+    # Se mensagem não menciona Madonna (nem com @), apenas aprende a frase
+    if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
+        aprender_frase(message)
+        return
+
+    # Para mensagens que mencionam Madonna diretamente (com @ ou texto)
+    time.sleep(15)
+    for chave, respostas in gatilhos_automaticos.items():
+        if all(p in texto for p in chave.split()):
+            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+            aprender_frase(message)
+            return
+
+    # Caso nenhum gatilho, responde com elogio ou insulto
+    categoria = "elogios" if random.choice([True, False]) else "insultos"
+    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+    frase = frase_nao_usada(lista, categoria)
+    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+    aprender_frase(message)
         return
 
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
