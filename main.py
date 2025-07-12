@@ -488,7 +488,7 @@ except:
 def aprender_frase(message):
     if message.chat.id != GRUPO_ID:
         return
-    if message.text and len(message.text) > 3:
+    if message.text and len(message.text) > 10:
         frase = {
             "nome": message.from_user.first_name,
             "texto": message.text
