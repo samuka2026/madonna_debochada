@@ -574,7 +574,7 @@ def aprender_frase(message):
 def repetir_frase():
     while True:
         try:
-            time.sleep(7000)
+            time.sleep(10000)
             if frases_aprendidas:
                 frase = random.choice(frases_aprendidas)
                 texto = frase["texto"]
