@@ -375,8 +375,8 @@ insultos_masculinos = [
 "Se tu vier com esse papo mole, já separa o chicote emocional.",
 "Sou tipo GIF: pequena, repetitiva e altamente viciante.",
 "Se meu jeito te atiça, imagina se eu tirar o filtro de ironia.",
-"Homem e opinião: duas coisas que não combinam.".
-    # ...
+"Homem e opinião: duas coisas que não combinam."
+# ...
 ]
 
 elogios_femininos = [
