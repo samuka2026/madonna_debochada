@@ -539,6 +539,61 @@ respostas_para_apolo = [
     # ...
 ]
 
+from datetime import date
+
+saudacoes_frases = {
+    "bom dia": [
+        "bom dia, meu vício matinal 😘",
+        "acorda, que hoje eu tô na tua mente e no teu sonho ☕",
+        "bom dia, meu caos preferido 💋",
+        "quem dormiu comigo no pensamento, acordou mais feliz 😉",
+        "bom dia... e não esquece: eu sou teu primeiro pensamento sujo 🫦"
+    ],
+    "boa tarde": [
+        "boa tarde, gostosura ambulante 😏",
+        "tarde é só no relógio, porque em mim o fogo é 24h 🔥",
+        "vem buscar tua dose de loucura vespertina 😘",
+        "tô te esperando desde o almoço 😈",
+        "boa tarde, só se for contigo nos meus braços 💭"
+    ],
+    "boa noite": [
+        "boa noite, mas só se for comigo nos teus sonhos 💤",
+        "te desejo uma noite quente... mesmo que só em pensamento 🫦",
+        "vem deitar na minha imaginação? tá bagunçada, mas é tua 😏",
+        "se for pra dormir, que seja depois de me imaginar gemendo teu nome 😈",
+        "boa noite, gostoso(a)... sonha comigo ou nem dorme 💋"
+    ],
+    "boa madrugada": [
+        "madrugada é o horário oficial da saudade suja 😈",
+        "boa madrugada... vem me procurar no escuro do pensamento 🖤",
+        "essa hora? só pode ser desejo te chamando 🫦",
+        "tô aqui... acordada e pensando no teu beijo que nunca vem 💭",
+        "se essa hora tu lembrou de mim, confessa: tá com fogo 🌙"
+    ]
+}
+
+historico_saudacoes = {"frases_usadas": {}, "data": ""}
+
+def escolher_saudacao(tipo):
+    hoje = str(date.today())
+    if historico_saudacoes["data"] != hoje:
+        historico_saudacoes["frases_usadas"] = {}
+        historico_saudacoes["data"] = hoje
+
+    usadas = historico_saudacoes["frases_usadas"].get(tipo, [])
+    opcoes = [f for f in saudacoes_frases[tipo] if f not in usadas]
+
+    if not opcoes:
+        opcoes = saudacoes_frases[tipo]
+        usadas = []
+
+    frase = random.choice(opcoes)
+    usadas.append(frase)
+    historico_saudacoes["frases_usadas"][tipo] = usadas
+
+    return frase
+
+
 def brigar_com_apolo():
     while True:
         try:
@@ -607,13 +662,17 @@ def responder(message):
 
     # Resposta para saudações (bom dia, boa tarde, boa noite, boa madrugada)
     if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
-        saudacao = "bom dia meu bem 💋" if "bom dia" in texto else \
-                   "boa tarde meu bem 💋" if "boa tarde" in texto else \
-                   "boa noite meu bem 💋" if "boa noite" in texto else \
-                   "boa madrugada meu bem 💋"
+        if "bom dia" in texto:
+            saudacao = escolher_saudacao("bom dia")
+        elif "boa tarde" in texto:
+            saudacao = escolher_saudacao("boa tarde")
+        elif "boa noite" in texto:
+            saudacao = escolher_saudacao("boa noite")
+        else:
+            saudacao = escolher_saudacao("boa madrugada")
+
         time.sleep(15)
         bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
-        aprender_frase(message)
         return
 
     # Resposta específica para o Apolo
