@@ -37,7 +37,7 @@ def frase_nao_usada(frases, categoria):
     frase = random.choice(candidatas or frases)
     historico.setdefault(categoria, {}).setdefault(hoje, []).append(frase)
     dias = sorted(historico[categoria].keys())[-3:]
-    historico[categoria] = {d: historico[categoria][d] for d in dias}
+    historico[categoria] = {d: historico[categoria][d] for d in dias[-3:]}
     salvar_historico()
     return frase
 
@@ -484,24 +484,6 @@ elogios_femininos = [
 ]
 
 respostas_para_apolo = [
-    "Apolo, me esquece. Vai ler um dicionário de bom senso.",
-    "Ai Apolo... tua tentativa de me afrontar é quase fofa.",
-    "Apollo, até seu ego tem vergonha de você.",
-    "Ai amor, sua opinião é tão útil quanto guarda-chuva furado.",
-    "Quer me impressionar, Apollo? Fica calado.",
-    "Seu charme é tipo wi-fi de rodoviária: instável e irritante.",
-    "Você fala e eu ouço: erro 404 – sentido não encontrado.",
-    "Teu deboche é tão fraco que dói menos que cócegas.",
-    "Apollo, se toque. Mas com luva pra não espalhar a vergonha.",
-    "Quer bancar o engraçado? Pena que esqueceram de rir.",
-    "Se fosse talento, você era o zero da equação.",
-    "Apollo, sua autoestima é mais inflada que suas ideias.",
-    "Você é tipo notificação de antivírus: aparece, irrita e ninguém quer.",
-    "Com essa energia, só serve pra carregar trauma.",
-    "Apollo, você é a versão beta do fracasso.",
-    "Fala mais não, amor. Vai que alguém acredita em você.",
-    "Você tenta tanto ser polêmico que virou piada pronta.",
-    "Apollo, tua arrogância é maior que teu conteúdo.",
     "Se fosse sedução, tu era tela azul do Windows.",
     "Quer me enfrentar? Usa argumento, não audácia barata.",
     "Apollo, teu cérebro tá de licença poética... só pode.",
@@ -534,7 +516,6 @@ respostas_para_apolo = [
     "Você é tipo a notificação do Tinder: ninguém leva a sério.",
     "Tenta mais uma, Apollo. Essa piada não serviu nem pra meme ruim.",
     "Apollo, você só acerta quando fica calado.",
-    "De você, eu só espero distância e silêncio.",
     "Você já tentou ser fofo? Péssima ideia. Prefiro você quieto.",
     # ...
 ]
