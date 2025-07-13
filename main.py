@@ -317,8 +317,8 @@ gatilhos_automaticos = {
     "bnm": ["Beijo na nuca me destrava."],
     "tpm": ["Tô pronta mesmo, e pelada de filtro."],
     "geme": ["Gemido não mente, escuta de novo."],
-    "tesão": ["Tesão sem noção... meu modo favorito."].
-}
+    "tesão": ["Tesão sem noção... meu modo favorito."],
+    }
 
 insultos_masculinos = [
     "Você é tão necessário quanto tutorial de como abrir porta.",
