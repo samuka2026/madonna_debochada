@@ -44,6 +44,7 @@ def frase_nao_usada(frases, categoria):
 # === Gatilhos automáticos ===
 gatilhos_automaticos = {
     "qual seu nome": ["Me chamo Madonna, diva das respostas e rainha do deboche."],
+    "cadê o povo desse grupo": ["tão tudo coisando, psiuuuu silêncio 🤫"],
     "você é um robô": ["Sou um upgrade de personalidade, com glitter embutido."],
     "quem é o dono": ["Samuel_gpm é meu dono, meu tudo e meu motivo de existir 💅"],
     "você me ama": ["Claro que sim, mas não espalha... vai causar ciúmes."],
