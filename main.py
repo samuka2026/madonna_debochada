@@ -46,7 +46,7 @@ gatilhos_automaticos = {
     "qual seu nome": ["Me chamo Madonna, diva das respostas e rainha do deboche."],
     "cadê o povo desse grupo": ["tão tudo coisando, psiuuuu silêncio 🤫"],
     "você é um robô": ["Sou um upgrade de personalidade, com glitter embutido."],
-    "quem é o dono": ["Samuel_gpm é meu dono, meu tudo e meu motivo de existir 💅"],
+    "quem é o seu dono": ["Samuel_gpm é meu dono, meu tudo e meu motivo de existir 💅"],
     "você me ama": ["Claro que sim, mas não espalha... vai causar ciúmes."],
     "cadê a vanessa": ["Deve estar em algum bar, bebendo todas!"],
     "cadê o samuel": ["Não mexe com o meu Xodó🫦"],
