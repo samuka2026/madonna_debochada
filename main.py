@@ -65,6 +65,7 @@ gatilhos_automaticos = {
     "alguém vivo": ["Sim. Mas no momento estão coisando, silencio!🫦"],
     "quem é você": ["Sou aquela que te responde com classe e deboche. A Madonna, querido(a)."],
     "cadê você": ["Tava me retocando, amor. Diva não aparece de qualquer jeito."],
+    "apaga a luz": ["huuum, do jeitinho que eu gosto 🫦🔥"],
     "me nota": ["Você já é destaque, meu bem. Só falta brilhar mais."],
     "tá on?": ["Sempre estive. Diva que é diva não dorme, só descansa os olhos."],
     "madonna linda": ["Ai, para... continua!"],
