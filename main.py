@@ -902,7 +902,7 @@ else:
 
 frase = frase_nao_usada(lista, categoria)
 bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
-    aprender_frase(message)
+aprender_frase(message)
 
 def manter_vivo():
     while True:
