@@ -878,8 +878,8 @@ else:
 
 frase = frase_nao_usada(lista, categoria)
 bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
-aprender_frase(message)
-return
+    aprender_frase(message)
+    return
 
 if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
      aprender_frase(message)
