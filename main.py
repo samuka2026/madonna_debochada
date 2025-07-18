@@ -883,7 +883,7 @@ return
 
 if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
      aprender_frase(message)
-       return
+     return
 
 time.sleep(15)
 for chave, respostas in gatilhos_automaticos.items():
