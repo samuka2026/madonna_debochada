@@ -881,16 +881,16 @@ bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
 aprender_frase(message)
 return
 
-    if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
-        aprender_frase(message)
-        return
+if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
+     aprender_frase(message)
+       return
 
-    time.sleep(15)
-    for chave, respostas in gatilhos_automaticos.items():
-        if all(p in texto for p in chave.split()):
-            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
-            aprender_frase(message)
-            return
+time.sleep(15)
+for chave, respostas in gatilhos_automaticos.items():
+       if all(p in texto for p in chave.split()):
+          bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+          aprender_frase(message)
+          return
 
     # Caso nenhum gatilho, responde conforme o gênero
 if username in MULHERES:
