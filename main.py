@@ -841,19 +841,10 @@ def responder(message):
 
         time.sleep(15)
         for chave, respostas in gatilhos_automaticos.items():
-            # Verifica se todas as palavras da chave aparecem no texto, mesmo fora de ordem
             if all(p in texto for p in chave.split()):
                 bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
                 aprender_frase(message)
                 return
-
-        # Se não encontrou gatilho, responde com elogio ou insulto
-        categoria = "elogios" if random.choice([True, False]) else "insultos"
-        lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
-        frase = frase_nao_usada(lista, categoria)
-        bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
-        aprender_frase(message)
-        return
 
     # Se mensagem não menciona Madonna (nem com @), apenas aprende a frase
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
@@ -869,40 +860,17 @@ def responder(message):
             return
 
     # Caso nenhum gatilho, responde conforme o gênero
-if username in MULHERES:
-    lista = elogios_femininos       # sempre elogio para mulher
-    categoria = "elogios"
-else:
-    lista = insultos_masculinos     # sempre insulto para homem
-    categoria = "insultos"
+    if username.lower() in MULHERES:
+        lista = elogios_femininos       # sempre elogio para mulher
+        categoria = "elogios"
+    else:
+        lista = insultos_masculinos     # sempre insulto para homem
+        categoria = "insultos"
 
-frase = frase_nao_usada(lista, categoria)
-bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+    frase = frase_nao_usada(lista, categoria)
+    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
     aprender_frase(message)
     return
-
-if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
-     aprender_frase(message)
-     return
-
-time.sleep(15)
-for chave, respostas in gatilhos_automaticos.items():
-       if all(p in texto for p in chave.split()):
-          bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
-          aprender_frase(message)
-          return
-
-    # Caso nenhum gatilho, responde conforme o gênero
-if username in MULHERES:
-    lista = elogios_femininos       # sempre elogio para mulher
-    categoria = "elogios"
-else:
-    lista = insultos_masculinos     # sempre insulto para homem
-    categoria = "insultos"
-
-frase = frase_nao_usada(lista, categoria)
-bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
-aprender_frase(message)
 
 def manter_vivo():
     while True:
