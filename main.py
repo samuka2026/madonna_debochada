@@ -868,11 +868,16 @@ def responder(message):
             aprender_frase(message)
             return
 
-    # Caso nenhum gatilho, responde com elogio ou insulto
-    categoria = "elogios" if random.choice([True, False]) else "insultos"
-    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
-    frase = frase_nao_usada(lista, categoria)
-    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+    # Caso nenhum gatilho, responde conforme o gênero
+if username in MULHERES:
+    lista = elogios_femininos       # sempre elogio para mulher
+    categoria = "elogios"
+else:
+    lista = insultos_masculinos     # sempre insulto para homem
+    categoria = "insultos"
+
+frase = frase_nao_usada(lista, categoria)
+bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
     aprender_frase(message)
     return
 
@@ -887,10 +892,16 @@ def responder(message):
             aprender_frase(message)
             return
 
-    categoria = "elogios" if random.choice([True, False]) else "insultos"
-    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
-    frase = frase_nao_usada(lista, categoria)
-    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+    # Caso nenhum gatilho, responde conforme o gênero
+if username in MULHERES:
+    lista = elogios_femininos       # sempre elogio para mulher
+    categoria = "elogios"
+else:
+    lista = insultos_masculinos     # sempre insulto para homem
+    categoria = "insultos"
+
+frase = frase_nao_usada(lista, categoria)
+bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
     aprender_frase(message)
 
 def manter_vivo():
