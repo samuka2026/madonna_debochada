@@ -807,69 +807,88 @@ def configurar_webhook():
         return "✅ Webhook configurado com sucesso!", 200
     return "✅ Webhook já estava configurado.", 200
 
-# ------------------------------------------------------------------
-# Substitua TODO o bloco antigo de responder() por ESTE aqui
-# ------------------------------------------------------------------
 @bot.message_handler(func=lambda msg: True)
 def responder(message):
-    texto     = message.text.lower() if message.text else ""
-    nome      = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
-    username  = (message.from_user.username or "").lower()
+    texto = message.text.lower() if message.text else ""
+    nome = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
+    username = message.from_user.username or ""
 
-    # 1. Saudações simples ----------------------------------------------------
-    if any(s in texto for s in ("bom dia", "boa tarde", "boa noite", "boa madrugada")):
-        if   "bom dia"       in texto: saudacao = escolher_saudacao("bom dia")
-        elif "boa tarde"     in texto: saudacao = escolher_saudacao("boa tarde")
-        elif "boa noite"     in texto: saudacao = escolher_saudacao("boa noite")
-        else:                       saudacao = escolher_saudacao("boa madrugada")
+    # Resposta para saudações (bom dia, boa tarde, boa noite, boa madrugada)
+    if any(s in texto for s in ["bom dia", "boa tarde", "boa noite", "boa madrugada"]):
+        if "bom dia" in texto:
+            saudacao = escolher_saudacao("bom dia")
+        elif "boa tarde" in texto:
+            saudacao = escolher_saudacao("boa tarde")
+        elif "boa noite" in texto:
+            saudacao = escolher_saudacao("boa noite")
+        else:
+            saudacao = escolher_saudacao("boa madrugada")
 
         time.sleep(15)
         bot.reply_to(message, f"{nome}, {saudacao}", parse_mode="Markdown")
         return
 
-    # 2. Alfinetar o Apolo -----------------------------------------------------
+    # Resposta específica para o Apolo
     if username == "apolo_8bp_bot" and "madonna" in texto:
-        bot.reply_to(message, f"{nome}, {random.choice(respostas_para_apolo)}",
-                     parse_mode="Markdown")
+        bot.reply_to(message, f"{nome}, {random.choice(respostas_para_apolo)}", parse_mode="Markdown")
         return
 
-    # 3. Respostas quando alguém responde a Madonna ---------------------------
-    if (message.reply_to_message
-            and message.reply_to_message.from_user.username == "madonna_debochada_bot"):
-
-        if username == "apolo_8bp_bot":                       # resposta direta ao Apolo
-            bot.reply_to(message, random.choice(respostas_para_apolo),
-                         parse_mode="Markdown")
+    # Se a mensagem é resposta a uma mensagem da Madonna
+    if message.reply_to_message and message.reply_to_message.from_user.username == "madonna_debochada_bot":
+        if username == "apolo_8bp_bot":
+            bot.reply_to(message, random.choice(respostas_para_apolo), parse_mode="Markdown")
             return
 
         time.sleep(15)
         for chave, respostas in gatilhos_automaticos.items():
+            # Verifica se todas as palavras da chave aparecem no texto, mesmo fora de ordem
             if all(p in texto for p in chave.split()):
-                bot.reply_to(message, f"{nome}, {random.choice(respostas)}",
-                             parse_mode="Markdown")
+                bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
                 aprender_frase(message)
                 return
 
-    # 4. Se não citou Madonna, só aprende a frase -----------------------------
+        # Se não encontrou gatilho, responde com elogio ou insulto
+        categoria = "elogios" if random.choice([True, False]) else "insultos"
+        lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+        frase = frase_nao_usada(lista, categoria)
+        bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+        aprender_frase(message)
+        return
+
+    # Se mensagem não menciona Madonna (nem com @), apenas aprende a frase
     if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
         aprender_frase(message)
         return
 
-    # 5. Citou Madonna (@ ou texto) – tenta gatilhos --------------------------
+    # Para mensagens que mencionam Madonna diretamente (com @ ou texto)
     time.sleep(15)
     for chave, respostas in gatilhos_automaticos.items():
         if all(p in texto for p in chave.split()):
-            bot.reply_to(message, f"{nome}, {random.choice(respostas)}",
-                         parse_mode="Markdown")
+            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
             aprender_frase(message)
             return
 
-    # 6. Nenhum gatilho: decide se elogia (mulher) ou insulta (homem) ----------
-    if username in (u.lower() for u in MULHERES):
-        lista, categoria = elogios_femininos, "elogios"
-    else:
-        lista, categoria = insultos_masculinos, "insultos"
+    # Caso nenhum gatilho, responde com elogio ou insulto
+    categoria = "elogios" if random.choice([True, False]) else "insultos"
+    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
+    frase = frase_nao_usada(lista, categoria)
+    bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
+    aprender_frase(message)
+    return
 
+    if "madonna" not in texto and f"@{bot.get_me().username.lower()}" not in texto:
+        aprender_frase(message)
+        return
+
+    time.sleep(15)
+    for chave, respostas in gatilhos_automaticos.items():
+        if all(p in texto for p in chave.split()):
+            bot.reply_to(message, f"{nome}, {random.choice(respostas)}", parse_mode="Markdown")
+            aprender_frase(message)
+            return
+
+    categoria = "elogios" if random.choice([True, False]) else "insultos"
+    lista = elogios_femininos if categoria == "elogios" else insultos_masculinos
     frase = frase_nao_usada(lista, categoria)
     bot.reply_to(message, f"{nome}, {frase}", parse_mode="Markdown")
     aprender_frase(message)
