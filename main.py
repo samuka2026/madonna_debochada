@@ -86,7 +86,7 @@ def responder(msg):
     # 👑 Submissão ao dono (apenas se mencionarem "madonna" ou @)
     if user_id == DONO_ID and frases_dono and ("madonna" in texto or f"@{bot.get_me().username.lower()}" in texto):
         frase = random.choice(frases_dono)
-        enviar_com_delay(60, GRUPO_ID, frase, msg.message_id)  # 1 minuto de delay
+        enviar_com_delay(40, GRUPO_ID, frase, msg.message_id)  # 1 minuto de delay
         return
 
 
@@ -110,7 +110,7 @@ def responder(msg):
         if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
             ultimos_envios_saudacoes[user_id] = agora
             frase = random.choice(bom_dia_mulher if mulher else bom_dia_homem)
-            enviar_com_delay(60, GRUPO_ID, frase, msg.message_id)
+            enviar_com_delay(120, GRUPO_ID, frase, msg.message_id)
         return
 
     # ☀️ Boa tarde
@@ -118,7 +118,7 @@ def responder(msg):
         if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
             ultimos_envios_saudacoes[user_id] = agora
             frase = random.choice(boa_tarde_mulher if mulher else boa_tarde_homem)
-            enviar_com_delay(60, GRUPO_ID, frase, msg.message_id)
+            enviar_com_delay(120, GRUPO_ID, frase, msg.message_id)
         return
 
     # 🌙 Boa noite ou boa madrugada
@@ -129,7 +129,7 @@ def responder(msg):
                 frase = random.choice(boa_noite_entrada_mulher if mulher else boa_noite_entrada_homem)
             else:
                 frase = random.choice(boa_noite_dormir_mulher if mulher else boa_noite_dormir_homem)
-            enviar_com_delay(60, GRUPO_ID, frase, msg.message_id)
+            enviar_com_delay(120, GRUPO_ID, frase, msg.message_id)
         return
 
     # 💖 Elogios ou desejos automáticos (1 por hora)
@@ -144,7 +144,7 @@ def responder(msg):
         else:
             frase = None
         if frase:
-            enviar_com_delay(1800, GRUPO_ID, frase, msg.message_id)  # 30 minutos de delay
+            enviar_com_delay(2500, GRUPO_ID, frase, msg.message_id)  # 30 minutos de delay
 
 # 🔁 ROTA FLASK PARA WEBHOOK (Render)
 @app.route(f"/{TOKEN}", methods=["POST"])
