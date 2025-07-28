@@ -107,6 +107,10 @@ def responder(msg):
 
     # 🌞 Bom dia
     if "bom dia" in texto:
+        # Ignorar se a pessoa está apenas respondendo outra mensagem (reply)
+        if msg.reply_to_message:
+          return
+
         if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
             ultimos_envios_saudacoes[user_id] = agora
             frase = random.choice(bom_dia_mulher if mulher else bom_dia_homem)
@@ -115,6 +119,10 @@ def responder(msg):
 
     # ☀️ Boa tarde
     if "boa tarde" in texto:
+        # Ignorar se a pessoa está apenas respondendo outra mensagem (reply)
+        if msg.reply_to_message:
+            return        
+        
         if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
             ultimos_envios_saudacoes[user_id] = agora
             frase = random.choice(boa_tarde_mulher if mulher else boa_tarde_homem)
@@ -123,6 +131,10 @@ def responder(msg):
 
     # 🌙 Boa noite ou boa madrugada
     if "boa noite" in texto or "boa madrugada" in texto:
+         # Ignorar se a pessoa está apenas respondendo outra mensagem (reply)
+         if msg.reply_to_message:
+              return
+        
         if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
             ultimos_envios_saudacoes[user_id] = agora
             if agora.hour < 21:
