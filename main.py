@@ -74,8 +74,8 @@ def enviar_com_delay(delay_segundos, chat_id, texto, reply_id=None):
 # ✅ Handler principal
 @bot.message_handler(func=lambda msg: True)
 def responder(msg):
-    if msg.chat.id != GRUPO_ID:
-        return
+    #if msg.chat.id != GRUPO_ID:
+    #    return
 
     texto = msg.text.lower()
     user_id = msg.from_user.id
