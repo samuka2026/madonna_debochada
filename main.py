@@ -129,20 +129,20 @@ def responder(msg):
             enviar_com_delay(120, msg.chat.id, frase, msg.message_id)
         return
 
-    # 🌙 Boa noite ou boa madrugada
-    if "boa noite" in texto or "boa madrugada" in texto:
-         # Ignorar se a pessoa está apenas respondendo outra mensagem (reply)
-         if msg.reply_to_message:
-              return
-        
-        if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
-            ultimos_envios_saudacoes[user_id] = agora
-            if agora.hour < 21:
-                frase = random.choice(boa_noite_entrada_mulher if mulher else boa_noite_entrada_homem)
-            else:
-                frase = random.choice(boa_noite_dormir_mulher if mulher else boa_noite_dormir_homem)
-            enviar_com_delay(120, msg.chat.id, frase, msg.message_id)
+   # 🌙 Boa noite ou boa madrugada
+if "boa noite" in texto or "boa madrugada" in texto:
+    # Ignorar se a pessoa está apenas respondendo outra mensagem (reply)
+    if msg.reply_to_message:
         return
+
+    if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
+        ultimos_envios_saudacoes[user_id] = agora
+        if agora.hour < 21:
+            frase = random.choice(boa_noite_entrada_mulher if mulher else boa_noite_entrada_homem)
+        else:
+            frase = random.choice(boa_noite_dormir_mulher if mulher else boa_noite_dormir_homem)
+        enviar_com_delay(120, msg.chat.id, frase, msg.message_id)
+    return
 
     # 💖 Elogios ou desejos automáticos (1 por hora)
     if user_id not in ultimos_envios_geral or (agora - ultimos_envios_geral[user_id]) > timedelta(minutes=30):
