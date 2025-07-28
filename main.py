@@ -129,7 +129,7 @@ def responder(msg):
             enviar_com_delay(120, msg.chat.id, frase, msg.message_id)
         return
 
-   # 🌙 Boa noite ou boa madrugada
+# 🌙 Boa noite ou boa madrugada
 if "boa noite" in texto or "boa madrugada" in texto:
     # Ignorar se a pessoa está apenas respondendo outra mensagem (reply)
     if msg.reply_to_message:
