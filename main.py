@@ -95,59 +95,22 @@ def responder(msg):
             bot.send_message(GRUPO_ID, random.choice(defesa_apollo), reply_to_message_id=msg.message_id)
         return
 
-    # 💬 Mencionaram a Madonna
+    # 💬 Mencionaram a Madonna (com saudação ou não)
     if "madonna" in texto or f"@{bot.get_me().username.lower()}" in texto:
-        if mulher and men_m:
-            bot.send_message(GRUPO_ID, random.choice(men_m), reply_to_message_id=msg.message_id)
-        elif not mulher and men_h:
-            bot.send_message(GRUPO_ID, random.choice(men_h), reply_to_message_id=msg.message_id)
-        return
-
-    # 🌞 Bom dia
-    if "bom dia" in texto:
-        if msg.reply_to_message:
-            return
-        if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
-            ultimos_envios_saudacoes[user_id] = agora
+        if "bom dia" in texto:
             frase = random.choice(bom_dia_mulher if mulher else bom_dia_homem)
-            enviar_com_delay(120, msg.chat.id, frase, msg.message_id)
-        return
-
-    # ☀️ Boa tarde
-    if "boa tarde" in texto:
-        if msg.reply_to_message:
-            return
-        if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
-            ultimos_envios_saudacoes[user_id] = agora
+        elif "boa tarde" in texto:
             frase = random.choice(boa_tarde_mulher if mulher else boa_tarde_homem)
-            enviar_com_delay(120, msg.chat.id, frase, msg.message_id)
-        return
-
-    # 🌙 Boa noite ou boa madrugada
-    if "boa noite" in texto or "boa madrugada" in texto:
-        if msg.reply_to_message:
-            return
-        if user_id not in ultimos_envios_saudacoes or (agora - ultimos_envios_saudacoes[user_id]) > timedelta(minutes=1):
-            ultimos_envios_saudacoes[user_id] = agora
+        elif "boa noite" in texto or "boa madrugada" in texto:
             if agora.hour < 21:
                 frase = random.choice(boa_noite_entrada_mulher if mulher else boa_noite_entrada_homem)
             else:
                 frase = random.choice(boa_noite_dormir_mulher if mulher else boa_noite_dormir_homem)
-            enviar_com_delay(120, msg.chat.id, frase, msg.message_id)
-        return
+        else:
+            frase = random.choice(men_m if mulher else men_h)
 
-    # 💖 Elogios ou desejos automáticos (1 a cada 30 minutos)
-    if user_id not in ultimos_envios_geral or (agora - ultimos_envios_geral[user_id]) > timedelta(minutes=30):
-        ultimos_envios_geral[user_id] = agora
-        frase = None
-        if mulher and elogios_mulher:
-            frase = random.choice(elogios_mulher)
-        elif not mulher and elogios_homem:
-            frase = random.choice(elogios_homem)
-        elif desejos_apollo:
-            frase = random.choice(desejos_apollo)
-        if frase:
-            enviar_com_delay(2400, msg.chat.id, frase, msg.message_id)
+        enviar_com_delay(60, msg.chat.id, frase, msg.message_id)
+        return
 
 # 🔁 ROTA FLASK PARA WEBHOOK (Render)
 @app.route(f"/{TOKEN}", methods=["POST"])
