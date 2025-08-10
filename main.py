@@ -73,6 +73,33 @@ temas = {
     "motivacao": {
         "keywords": ["triste", "desanimado", "cansada", "sem forças", "fracasso"],
         "respostas": carregar_lista("temas/motivacao.json")
+    },
+    "uno": {
+        "keywords": ["uno", "comprar carta", "+4", "baralho uno"],
+        "respostas": carregar_lista("temas/uno.json")
+    },
+    "quiz": {
+        "keywords": ["kiss", "beijo", "beijar", "beijinho"],
+        "respostas": carregar_lista("temas/kiss.json")
+    },
+    "jogo_velha": {
+        "keywords": ["jogo da velha", "velha", "tabuleiro", "x ganha", "o ganha"],
+        "respostas": carregar_lista("temas/jogo_velha.json")
+    },
+    "desenho": {
+        "keywords": ["desenho", "pintar", "desenhei", "arte", "pintura"],
+        "respostas": carregar_lista("temas/desenho.json")
+    },
+    "deuses": {
+        "keywords": [
+            "zeus", "hades", "poseidon", "afrodite", "ares", "hera",
+            "deus", "deusa", "olimpico", "olimpíadas", "mitologia"
+        ],
+        "respostas": carregar_lista("temas/deuses.json")
+    },
+    "provocacao": {
+        "keywords": ["ganhei", "venci", "campeão", "vou ganhar", "ninguém me vence"],
+        "respostas": carregar_lista("temas/provocacao.json")
     }
 }
 
