@@ -90,10 +90,10 @@ def responder(msg):
         return
 
     # 💘 Madonna em defesa do Apollo
-    if "apollo" in texto or "@apolo_8bp_bot" in texto:
-        if defesa_apollo:
-            bot.send_message(GRUPO_ID, random.choice(defesa_apollo), reply_to_message_id=msg.message_id)
-        return
+    #if "apollo" in texto or "@apolo_8bp_bot" in texto:
+    #    if defesa_apollo:
+    #        bot.send_message(GRUPO_ID, random.choice(defesa_apollo), reply_to_message_id=msg.message_id)
+    #    return
 
     # 💬 Mencionaram a Madonna (com saudação ou não)
     if "madonna" in texto or f"@{bot.get_me().username.lower()}" in texto:
