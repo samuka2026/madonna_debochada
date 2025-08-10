@@ -168,15 +168,15 @@ def responder(msg):
         return
 
     # 🎯 Resposta inteligente por tema detectado
-for tema, dados in temas.items():
-    if user_id in ultimos_envios_geral and (agora - ultimos_envios_geral[user_id]) < timedelta(minutes=20):
-        return
-    ultimos_envios_geral[user_id] = agora
-    if any(palavra in texto for palavra in dados["keywords"]):
-        if dados["respostas"]:
-            frase = random.choice(dados["respostas"])
-            enviar_com_delay(random.randint(10, 30), msg.chat.id, frase, msg.message_id)
-        return
+    for tema, dados in temas.items():
+        if user_id in ultimos_envios_geral and (agora - ultimos_envios_geral[user_id]) < timedelta(minutes=20):
+            return
+        ultimos_envios_geral[user_id] = agora
+        if any(palavra in texto for palavra in dados["keywords"]):
+            if dados["respostas"]:
+                frase = random.choice(dados["respostas"])
+                enviar_com_delay(random.randint(10, 30), msg.chat.id, frase, msg.message_id)
+            return
 
 # 🔁 ROTA FLASK PARA WEBHOOK (Render)
 @app.route(f"/{TOKEN}", methods=["POST"])
