@@ -169,7 +169,7 @@ def responder(msg):
 
     # 🎯 Resposta inteligente por tema detectado
     for tema, dados in temas.items():
-        if user_id in ultimos_envios_geral and (agora - ultimos_envios_geral[user_id]) < timedelta(minutes=20):
+        if user_id in ultimos_envios_geral and (agora - ultimos_envios_geral[user_id]) < timedelta(minutes=1):
             return
         ultimos_envios_geral[user_id] = agora
         if any(palavra in texto for palavra in dados["keywords"]):
