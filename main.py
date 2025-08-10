@@ -48,6 +48,34 @@ defesa_apollo = carregar_lista("defesa_apollo.json")
 usuarios_mulheres = carregar_lista("usuarios_mulheres.json")
 usuarios_homens = carregar_lista("usuarios_homens.json")
 
+# ✅ Listas temáticas para respostas inteligentes
+temas = {
+    "cafe": {
+        "keywords": ["café", "cafezinho", "expresso", "capuccino"],
+        "respostas": carregar_lista("temas/cafe.json")
+    },
+    "comida": {
+        "keywords": ["pizza", "hamburguer", "lanche", "almoço", "janta", "fome"],
+        "respostas": carregar_lista("temas/comida.json")
+    },
+    "namoro": {
+        "keywords": ["namoro", "ficar", "beijo", "crush", "coração partido"],
+        "respostas": carregar_lista("temas/namoro.json")
+    },
+    "preguiça": {
+        "keywords": ["preguiça", "sono", "dormir", "descansar", "cansado"],
+        "respostas": carregar_lista("temas/preguica.json")
+    },
+    "fofoca": {
+        "keywords": ["mentira", "fofoca", "treta", "confusão", "barraco"],
+        "respostas": carregar_lista("temas/fofoca.json")
+    },
+    "motivacao": {
+        "keywords": ["triste", "desanimado", "cansada", "sem forças", "fracasso"],
+        "respostas": carregar_lista("temas/motivacao.json")
+    }
+}
+
 # ✅ Detecta se é mulher com base no @ ou nome
 
 def e_mulher(user):
@@ -110,6 +138,17 @@ def responder(msg):
             frase = random.choice(men_m if mulher else men_h)
 
         enviar_com_delay(60, msg.chat.id, frase, msg.message_id)
+        return
+
+    # 🎯 Resposta inteligente por tema detectado
+for tema, dados in temas.items():
+    if user_id in ultimos_envios_geral and (agora - ultimos_envios_geral[user_id]) < timedelta(minutes=20):
+        return
+    ultimos_envios_geral[user_id] = agora
+    if any(palavra in texto for palavra in dados["keywords"]):
+        if dados["respostas"]:
+            frase = random.choice(dados["respostas"])
+            enviar_com_delay(random.randint(10, 30), msg.chat.id, frase, msg.message_id)
         return
 
 # 🔁 ROTA FLASK PARA WEBHOOK (Render)
