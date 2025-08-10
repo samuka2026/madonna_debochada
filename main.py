@@ -142,7 +142,7 @@ def responder(msg):
     if user_id == DONO_ID and frases_dono and ("madonna" in texto or f"@{bot.get_me().username.lower()}" in texto):
         frase = random.choice(frases_dono)
         enviar_com_delay(40, msg.chat.id, frase, msg.message_id)  # 40 segundos de delay
-        return
+    return
 
     # 💘 Madonna em defesa do Apollo
     #if "apollo" in texto or "@apolo_8bp_bot" in texto:
