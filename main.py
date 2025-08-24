@@ -11,6 +11,7 @@ import json
 import threading
 from datetime import datetime, timedelta
 
+
 # ✅ CONFIGURAÇÕES DO GRUPO
 GRUPO_ID = -1002363575666              # Substitua pelo ID do seu grupo
 DONO_ID = 1481389775                   # ID do dono da Madonna (submissão)
@@ -119,6 +120,10 @@ ultimos_envios = {}
 # ✅ Controle de envio para saudação e respostas automáticas
 ultimos_envios_saudacoes = {}
 ultimos_envios_geral = {}
+# Memória das frases para o jogo "Quem disse?"
+frases_guardadas = []
+frases_usadas = []
+usuarios_registrados = {}  # user_id -> first_name
 
 # ✅ Envia mensagem com atraso (em segundos)
 def enviar_com_delay(delay_segundos, chat_id, texto, reply_id=None):
@@ -137,6 +142,15 @@ def responder(msg):
     nome = msg.from_user.first_name or msg.from_user.username or "Amor"
     mulher = e_mulher(msg.from_user)
     agora = datetime.now()
+
+    # Registrar o usuário e a frase se for válida
+    if msg.text:
+        texto_limpo = msg.text.strip()
+        palavras = texto_limpo.split()
+        if len(palavras) >= 3 and not all(ch in "kKcC" for ch in texto_limpo):  # evita "kkkk"
+            if len(texto_limpo) > 5:  # evitar coisas muito curtas
+                usuarios_registrados[user_id] = nome   # <-- aqui é 'nome', não 'first_name'
+                frases_guardadas.append((texto_limpo, user_id))
 
     # 👑 Submissão ao dono (apenas se mencionarem "madonna" ou @)
     if user_id == DONO_ID and frases_dono and ("madonna" in texto or f"@{bot.get_me().username.lower()}" in texto):
@@ -179,6 +193,39 @@ def responder(msg):
                 enviar_com_delay(random.randint(10, 30), msg.chat.id, frase, msg.message_id)
                 ultimos_envios_geral[user_id] = agora
             return
+def disparar_enquete_periodica():
+    while True:
+        time.sleep(1800)  # 30 minutos
+        try:
+            if not frases_guardadas:
+                continue
+
+            # escolhe uma frase ainda não usada
+            candidatas = [f for f in frases_guardadas if f not in frases_usadas]
+            if not candidatas:
+                continue
+
+            frase, autor_id = random.choice(candidatas)
+            frases_usadas.append((frase, autor_id))
+
+            # precisa de pelo menos 4 usuários diferentes para as opções
+            if len(usuarios_registrados) < 4:
+                continue
+
+            # monta opções da enquete
+            autor_nome = usuarios_registrados.get(autor_id, "???")
+            outros = [nome for uid, nome in usuarios_registrados.items() if uid != autor_id]
+            if len(outros) < 3:
+                continue
+
+            opcoes = random.sample(outros, 3) + [autor_nome]
+            random.shuffle(opcoes)
+
+            pergunta = f"Quem disse essa frase?\n\n“{frase}”"
+            bot.send_poll(GRUPO_ID, pergunta, opcoes, is_anonymous=False, type="regular")
+
+        except Exception as e:
+            print(f"[ERRO ENQUETE] {e}")
 
 # 🔁 ROTA FLASK PARA WEBHOOK (Render)
 @app.route(f"/{TOKEN}", methods=["POST"])
@@ -208,5 +255,7 @@ def manter_vivo():
 # 🚀 INICIAR
 if __name__ == "__main__":
     threading.Thread(target=manter_vivo).start()
+    # Thread para disparar enquetes automaticamente
+    threading.Thread(target=disparar_enquete_periodica, daemon=True).start()
     port = int(os.getenv("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
