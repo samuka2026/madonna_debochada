@@ -247,7 +247,7 @@ def disparar_enquete_periodica():
                 }
                 enquetes_ativas[msg.poll.id] = {"resposta": msg.poll.correct_option_id, "frase": frase}
 
-        time.sleep(1800)
+        time.sleep(3600)
 
 # ✅ Função para postar ranking final à meia-noite
 def postar_ranking_final():
