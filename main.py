@@ -134,14 +134,46 @@ def enviar_com_delay(delay_segundos, chat_id, texto, reply_id=None):
 # ✅ Handler principal
 @bot.message_handler(func=lambda msg: True)
 def responder(msg):
-    #if msg.chat.id != GRUPO_ID:
-    #    return
-
     texto = msg.text.lower()
     user_id = msg.from_user.id
     nome = msg.from_user.first_name or msg.from_user.username or "Amor"
     mulher = e_mulher(msg.from_user)
     agora = datetime.now()
+
+    # 🔹 COMANDO DO DONO PARA CRIAR ENQUETE MANUALMENTE
+    if user_id == DONO_ID and texto == "/enquete":
+        try:
+            if not frases_guardadas:
+                bot.send_message(GRUPO_ID, "Não há frases registradas para criar a enquete 😅")
+                return
+
+            candidatas = [f for f in frases_guardadas if f not in frases_usadas]
+            if not candidatas:
+                bot.send_message(GRUPO_ID, "Todas as frases já foram usadas! 🤷‍♀️")
+                return
+
+            frase, autor_id = random.choice(candidatas)
+            frases_usadas.append((frase, autor_id))
+
+            if len(usuarios_registrados) < 4:
+                bot.send_message(GRUPO_ID, "Não há usuários suficientes para criar a enquete 😅")
+                return
+
+            autor_nome = usuarios_registrados.get(autor_id, "???")
+            outros = [nome for uid, nome in usuarios_registrados.items() if uid != autor_id]
+            if len(outros) < 3:
+                bot.send_message(GRUPO_ID, "Não há usuários suficientes para criar opções da enquete 😅")
+                return
+
+            opcoes = random.sample(outros, 3) + [autor_nome]
+            random.shuffle(opcoes)
+
+            pergunta = f"Quem disse essa frase?\n\n“{frase}”"
+            bot.send_poll(GRUPO_ID, pergunta, opcoes, is_anonymous=False, type="regular")
+            bot.send_message(GRUPO_ID, "Enquete manual criada! 🎉")
+        except Exception as e:
+            bot.send_message(GRUPO_ID, f"Erro ao criar enquete: {e}")
+        return  # Para não processar o resto da função nesse caso
 
     # Registrar o usuário e a frase se for válida
     if msg.text:
