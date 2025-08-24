@@ -11,7 +11,6 @@ import json
 import threading
 from datetime import datetime, timedelta
 
-
 # ✅ CONFIGURAÇÕES DO GRUPO
 GRUPO_ID = -1002363575666              # Substitua pelo ID do seu grupo
 DONO_ID = 1481389775                   # ID do dono da Madonna (submissão)
@@ -22,7 +21,6 @@ bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
 # ✅ Função para carregar arquivos .json da raiz do projeto
-
 def carregar_lista(nome_arquivo):
     try:
         with open(nome_arquivo, "r", encoding="utf-8") as f:
@@ -51,61 +49,21 @@ usuarios_homens = carregar_lista("usuarios_homens.json")
 
 # ✅ Listas temáticas para respostas inteligentes
 temas = {
-    "cafe": {
-        "keywords": ["café", "cafezinho", "expresso", "capuccino"],
-        "respostas": carregar_lista("temas/cafe.json")
-    },
-    "comida": {
-        "keywords": ["pizza", "hamburguer", "lanche", "almoço", "janta", "fome"],
-        "respostas": carregar_lista("temas/comida.json")
-    },
-    "namoro": {
-        "keywords": ["namoro", "ficar", "beijo", "crush", "coração partido"],
-        "respostas": carregar_lista("temas/namoro.json")
-    },
-    "preguiça": {
-        "keywords": ["preguiça", "sono", "dormir", "descansar", "cansado"],
-        "respostas": carregar_lista("temas/preguica.json")
-    },
-    "fofoca": {
-        "keywords": ["mentira", "fofoca", "treta", "confusão", "barraco"],
-        "respostas": carregar_lista("temas/fofoca.json")
-    },
-    "motivacao": {
-        "keywords": ["triste", "desanimado", "cansada", "sem forças", "fracasso"],
-        "respostas": carregar_lista("temas/motivacao.json")
-    },
-    "uno": {
-        "keywords": ["uno", "comprar carta", "+4", "baralho uno"],
-        "respostas": carregar_lista("temas/uno.json")
-    },
-    "quiz": {
-        "keywords": ["kiss", "beijo", "beijar", "beijinho"],
-        "respostas": carregar_lista("temas/kiss.json")
-    },
-    "jogo_velha": {
-        "keywords": ["jogo da velha", "velha", "tabuleiro", "x ganha", "o ganha"],
-        "respostas": carregar_lista("temas/jogo_velha.json")
-    },
-    "desenho": {
-        "keywords": ["desenho", "pintar", "desenhei", "arte", "pintura"],
-        "respostas": carregar_lista("temas/desenho.json")
-    },
-    "deuses": {
-        "keywords": [
-            "zeus", "hades", "poseidon", "afrodite", "ares", "hera",
-            "deus", "deusa", "olimpico", "olimpíadas", "mitologia"
-        ],
-        "respostas": carregar_lista("temas/deuses.json")
-    },
-    "provocacao": {
-        "keywords": ["ganhei", "venci", "campeão", "vou ganhar", "ninguém me vence"],
-        "respostas": carregar_lista("temas/provocacao.json")
-    }
+    "cafe": {"keywords": ["café", "cafezinho", "expresso", "capuccino"], "respostas": carregar_lista("temas/cafe.json")},
+    "comida": {"keywords": ["pizza", "hamburguer", "lanche", "almoço", "janta", "fome"], "respostas": carregar_lista("temas/comida.json")},
+    "namoro": {"keywords": ["namoro", "ficar", "beijo", "crush", "coração partido"], "respostas": carregar_lista("temas/namoro.json")},
+    "preguiça": {"keywords": ["preguiça", "sono", "dormir", "descansar", "cansado"], "respostas": carregar_lista("temas/preguica.json")},
+    "fofoca": {"keywords": ["mentira", "fofoca", "treta", "confusão", "barraco"], "respostas": carregar_lista("temas/fofoca.json")},
+    "motivacao": {"keywords": ["triste", "desanimado", "cansada", "sem forças", "fracasso"], "respostas": carregar_lista("temas/motivacao.json")},
+    "uno": {"keywords": ["uno", "comprar carta", "+4", "baralho uno"], "respostas": carregar_lista("temas/uno.json")},
+    "quiz": {"keywords": ["kiss", "beijo", "beijar", "beijinho"], "respostas": carregar_lista("temas/kiss.json")},
+    "jogo_velha": {"keywords": ["jogo da velha", "velha", "tabuleiro", "x ganha", "o ganha"], "respostas": carregar_lista("temas/jogo_velha.json")},
+    "desenho": {"keywords": ["desenho", "pintar", "desenhei", "arte", "pintura"], "respostas": carregar_lista("temas/desenho.json")},
+    "deuses": {"keywords": ["zeus", "hades", "poseidon", "afrodite", "ares", "hera", "deus", "deusa", "olimpico", "olimpíadas", "mitologia"], "respostas": carregar_lista("temas/deuses.json")},
+    "provocacao": {"keywords": ["ganhei", "venci", "campeão", "vou ganhar", "ninguém me vence"], "respostas": carregar_lista("temas/provocacao.json")}
 }
 
 # ✅ Detecta se é mulher com base no @ ou nome
-
 def e_mulher(user):
     username = (user.username or "").lower()
     if username in [u.lower() for u in usuarios_mulheres]:
@@ -115,17 +73,18 @@ def e_mulher(user):
     nome = (user.first_name or "").lower()
     return nome[-1] in ["a", "e"]
 
-# ✅ Controle de envio 1x por hora para cada usuário
+# ✅ Controles globais
 ultimos_envios = {}
-# ✅ Controle de envio para saudação e respostas automáticas
 ultimos_envios_saudacoes = {}
 ultimos_envios_geral = {}
-# Memória das frases para o jogo "Quem disse?"
 frases_guardadas = []
 frases_usadas = []
-usuarios_registrados = {}  # user_id -> first_name
+usuarios_registrados = {}
+enquetes_ativas = {}
+ranking_acertos = {}
+ultima_enquete = {"frase": "", "autor": "", "acertaram": []}
 
-# ✅ Envia mensagem com atraso (em segundos)
+# ✅ Envia mensagem com atraso
 def enviar_com_delay(delay_segundos, chat_id, texto, reply_id=None):
     def tarefa():
         bot.send_message(chat_id, texto, reply_to_message_id=reply_id)
@@ -173,30 +132,24 @@ def responder(msg):
             bot.send_message(GRUPO_ID, "Enquete manual criada! 🎉")
         except Exception as e:
             bot.send_message(GRUPO_ID, f"Erro ao criar enquete: {e}")
-        return  # Para não processar o resto da função nesse caso
+        return
 
     # Registrar o usuário e a frase se for válida
     if msg.text:
         texto_limpo = msg.text.strip()
         palavras = texto_limpo.split()
-        if len(palavras) >= 3 and not all(ch in "kKcC" for ch in texto_limpo):  # evita "kkkk"
-            if len(texto_limpo) > 5:  # evitar coisas muito curtas
-                usuarios_registrados[user_id] = nome   # <-- aqui é 'nome', não 'first_name'
+        if len(palavras) >= 3 and not all(ch in "kKcC" for ch in texto_limpo):
+            if len(texto_limpo) > 5:
+                usuarios_registrados[user_id] = nome
                 frases_guardadas.append((texto_limpo, user_id))
 
-    # 👑 Submissão ao dono (apenas se mencionarem "madonna" ou @)
+    # 👑 Submissão ao dono
     if user_id == DONO_ID and frases_dono and ("madonna" in texto or f"@{bot.get_me().username.lower()}" in texto):
         frase = random.choice(frases_dono)
-        enviar_com_delay(40, msg.chat.id, frase, msg.message_id)  # 40 segundos de delay
+        enviar_com_delay(40, msg.chat.id, frase, msg.message_id)
         return
 
-    # 💘 Madonna em defesa do Apollo
-    #if "apollo" in texto or "@apolo_8bp_bot" in texto:
-    #    if defesa_apollo:
-    #        bot.send_message(GRUPO_ID, random.choice(defesa_apollo), reply_to_message_id=msg.message_id)
-    #    return
-
-    # 💬 Mencionaram a Madonna (com saudação ou não)
+    # 💬 Mencionaram a Madonna
     if "madonna" in texto or f"@{bot.get_me().username.lower()}" in texto:
         if "bom dia" in texto:
             frase = random.choice(bom_dia_mulher if mulher else bom_dia_homem)
@@ -209,15 +162,12 @@ def responder(msg):
                 frase = random.choice(boa_noite_dormir_mulher if mulher else boa_noite_dormir_homem)
         else:
             frase = random.choice(men_m if mulher else men_h)
-
         enviar_com_delay(60, msg.chat.id, frase, msg.message_id)
         return
 
-    # 🎯 Resposta inteligente por tema detectado
-    # Aplica cooldown só depois de realmente responder
+    # 🎯 Resposta inteligente por tema
     if user_id in ultimos_envios_geral and (agora - ultimos_envios_geral[user_id]) < timedelta(minutes=1):
         return
-
     for tema, dados in temas.items():
         if any(palavra in texto for palavra in dados["keywords"]):
             if dados["respostas"]:
@@ -225,43 +175,100 @@ def responder(msg):
                 enviar_com_delay(random.randint(10, 30), msg.chat.id, frase, msg.message_id)
                 ultimos_envios_geral[user_id] = agora
             return
+
+# ✅ Handler de respostas de enquetes
+@bot.poll_answer_handler()
+def receber_voto(poll_answer):
+    poll_id = poll_answer.poll_id
+    user_id = poll_answer.user.id
+    first_name = poll_answer.user.first_name
+
+    if poll_id not in enquetes_ativas:
+        return
+
+    resposta_certa = enquetes_ativas[poll_id]["resposta"]
+    if poll_answer.option_ids and resposta_certa == poll_answer.option_ids[0]:
+        ranking_acertos[user_id] = ranking_acertos.get(user_id, 0) + 1
+        if ultima_enquete:
+            ultima_enquete["acertaram"].append(first_name)
+
+# ✅ Função para disparar enquetes periódicas
 def disparar_enquete_periodica():
+    global ultima_enquete
     while True:
-        time.sleep(1800)  # 30 minutos
-        try:
-            agora = datetime.now()
-            hora = agora.hour
+        agora = datetime.now()
+        if 6 <= agora.hour < 24:  # só das 6h até meia-noite
+            chat_id = GRUPO_ID
 
-            # Só dispara entre 6h (inclusive) e 24h (exclusivo → até 23:59)
-            if hora < 6 or hora >= 24:  
-                continue
+            # postar resultado da última enquete
+            if ultima_enquete and ultima_enquete["frase"]:
+                frase = ultima_enquete["frase"]
+                autor = ultima_enquete["autor"]
+                acertaram = ultima_enquete["acertaram"]
 
+                texto = f"✅ Resposta da enquete passada:\nQuem falou \"{frase}\" foi {autor}\n"
+                if acertaram:
+                    texto += f"Acertaram: {', '.join(acertaram)}\n"
+                else:
+                    texto += "Ninguém acertou 😅\n"
 
-            if not frases_guardadas or len(usuarios_registrados) < 4:
-                continue
+                if ranking_acertos:
+                    texto += "\n🏆 Ranking parcial:\n"
+                    for uid, pontos in ranking_acertos.items():
+                        nome = usuarios_registrados.get(uid, "??")
+                        texto += f"- {nome}: {pontos} pontos\n"
+                bot.send_message(chat_id, texto)
 
-            candidatas = [f for f in frases_guardadas if f not in frases_usadas]
-            if not candidatas:
-                continue
+            # pegar nova frase sem repetir
+            frases_disponiveis = [f for f in frases_guardadas if f not in frases_usadas]
+            if frases_disponiveis:
+                frase, autor_id = random.choice(frases_disponiveis)
+                frases_usadas.append((frase, autor_id))
 
-            frase, autor_id = random.choice(candidatas)
-            frases_usadas.append((frase, autor_id))
+                usuarios = list(usuarios_registrados.keys())
+                random.shuffle(usuarios)
+                corretor = autor_id
+                opcoes = [usuarios_registrados[u] for u in usuarios[:3]] + [usuarios_registrados[corretor]]
+                random.shuffle(opcoes)
 
-            autor_nome = usuarios_registrados.get(autor_id, "???")
-            outros = [nome for uid, nome in usuarios_registrados.items() if uid != autor_id]
-            if len(outros) < 3:
-                continue
+                msg = bot.send_poll(
+                    chat_id,
+                    f"Quem falou: \"{frase}\"?",
+                    opcoes,
+                    type="quiz",
+                    correct_option_id=opcoes.index(usuarios_registrados[corretor]),
+                    is_anonymous=False
+                )
 
-            opcoes = random.sample(outros, 3) + [autor_nome]
-            random.shuffle(opcoes)
+                ultima_enquete = {
+                    "frase": frase,
+                    "autor": usuarios_registrados[corretor],
+                    "acertaram": []
+                }
+                enquetes_ativas[msg.poll.id] = {"resposta": msg.poll.correct_option_id, "frase": frase}
 
-            pergunta = f"Quem disse essa frase?\n\n“{frase}”"
-            bot.send_poll(GRUPO_ID, pergunta, opcoes, is_anonymous=False, type="regular")
+        time.sleep(1800)
 
-        except Exception as e:
-            print(f"Erro no disparo periódico: {e}")
+# ✅ Função para postar ranking final à meia-noite
+def postar_ranking_final():
+    global ranking_acertos
+    while True:
+        agora = datetime.now()
+        if agora.hour == 0 and agora.minute == 0:
+            if ranking_acertos:
+                texto = "🏆 Ranking final do dia:\n"
+                ordenado = sorted(ranking_acertos.items(), key=lambda x: x[1], reverse=True)
+                for uid, pontos in ordenado:
+                    nome = usuarios_registrados.get(uid, "??")
+                    texto += f"- {nome}: {pontos} pontos\n"
+                bot.send_message(GRUPO_ID, texto)
+                ranking_acertos = {}
+        time.sleep(60)
 
-# 🔁 ROTA FLASK PARA WEBHOOK (Render)
+# inicia a thread do ranking final
+threading.Thread(target=postar_ranking_final, daemon=True).start()
+
+# 🔁 ROTA FLASK PARA WEBHOOK
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
@@ -276,7 +283,6 @@ def home():
     return "Madonna online! ✨", 200
 
 # 🔄 Mantém o bot vivo no Render
-
 def manter_vivo():
     import requests
     while True:
@@ -289,7 +295,6 @@ def manter_vivo():
 # 🚀 INICIAR
 if __name__ == "__main__":
     threading.Thread(target=manter_vivo).start()
-    # Thread para disparar enquetes automaticamente
     threading.Thread(target=disparar_enquete_periodica, daemon=True).start()
     port = int(os.getenv("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
