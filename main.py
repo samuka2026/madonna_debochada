@@ -229,10 +229,17 @@ def disparar_enquete_periodica():
     while True:
         time.sleep(1800)  # 30 minutos
         try:
-            if not frases_guardadas:
+            agora = datetime.now()
+            hora = agora.hour
+
+            # Só dispara entre 6h (inclusive) e 24h (exclusivo → até 23:59)
+            if hora < 6 or hora >= 24:  
                 continue
 
-            # escolhe uma frase ainda não usada
+
+            if not frases_guardadas or len(usuarios_registrados) < 4:
+                continue
+
             candidatas = [f for f in frases_guardadas if f not in frases_usadas]
             if not candidatas:
                 continue
@@ -240,11 +247,6 @@ def disparar_enquete_periodica():
             frase, autor_id = random.choice(candidatas)
             frases_usadas.append((frase, autor_id))
 
-            # precisa de pelo menos 4 usuários diferentes para as opções
-            if len(usuarios_registrados) < 4:
-                continue
-
-            # monta opções da enquete
             autor_nome = usuarios_registrados.get(autor_id, "???")
             outros = [nome for uid, nome in usuarios_registrados.items() if uid != autor_id]
             if len(outros) < 3:
@@ -257,7 +259,7 @@ def disparar_enquete_periodica():
             bot.send_poll(GRUPO_ID, pergunta, opcoes, is_anonymous=False, type="regular")
 
         except Exception as e:
-            print(f"[ERRO ENQUETE] {e}")
+            print(f"Erro no disparo periódico: {e}")
 
 # 🔁 ROTA FLASK PARA WEBHOOK (Render)
 @app.route(f"/{TOKEN}", methods=["POST"])
