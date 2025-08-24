@@ -206,17 +206,20 @@ def disparar_enquete_periodica():
                 autor = ultima_enquete["autor"]
                 acertaram = ultima_enquete["acertaram"]
 
-                texto = f"✅ Resposta da enquete passada:\nQuem falou \"{frase}\" foi {autor}\n"
+                texto = f"✅ **Resultado da última enquete**\n\n"
+                texto += f"🗣️ **Quem falou a frase:**\n\"{frase}\"\n→ **{autor}**\n\n"
+
                 if acertaram:
-                    texto += f"Acertaram: {', '.join(acertaram)}\n"
+                    texto += f"🎯 **Acertaram:**\n" + "\n".join([f"- {nome}" for nome in acertaram]) + "\n\n"
                 else:
-                    texto += "Ninguém acertou 😅\n"
+                    texto += "😅 **Ninguém acertou.**\n\n"
 
                 if ranking_acertos:
-                    texto += "\n🏆 Ranking parcial:\n"
-                    for uid, pontos in ranking_acertos.items():
+                    texto += "🏆 **Ranking parcial do dia:**\n"
+                    for uid, pontos in sorted(ranking_acertos.items(), key=lambda x: x[1], reverse=True):
                         nome = usuarios_registrados.get(uid, "??")
-                        texto += f"- {nome}: {pontos} pontos\n"
+                        texto += f"{pontos} pts - {nome}\n"
+
                 bot.send_message(chat_id, texto)
 
             # pegar nova frase sem repetir
@@ -228,17 +231,22 @@ def disparar_enquete_periodica():
                 usuarios = list(usuarios_registrados.keys())
                 random.shuffle(usuarios)
                 corretor = autor_id
-                opcoes = [usuarios_registrados[u] for u in usuarios[:3]] + [usuarios_registrados[corretor]]
+                # Pega 3 usuários aleatórios que não sejam o autor
+                opcoes = [usuarios_registrados[u] for u in usuarios if u != corretor]
+                opcoes = random.sample(opcoes, min(3, len(opcoes)))  # garante 3 opções
+                opcoes.append(usuarios_registrados[corretor])  # adiciona o autor
                 random.shuffle(opcoes)
 
+                pergunta = f"📝 **Enquete:** Quem disse esta frase?\n\n💬 \"{frase}\""
                 msg = bot.send_poll(
                     chat_id,
-                    f"Quem falou: \"{frase}\"?",
+                    pergunta,
                     opcoes,
                     type="quiz",
                     correct_option_id=opcoes.index(usuarios_registrados[corretor]),
                     is_anonymous=False
                 )
+
 
                 ultima_enquete = {
                     "frase": frase,
