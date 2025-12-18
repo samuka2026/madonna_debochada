@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 # ✅ CONFIGURAÇÕES DO GRUPO
 GRUPO_ID = -1002606951329
-DONO_ID = 1481389775
+DONO_ID = 8338739275
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
 
