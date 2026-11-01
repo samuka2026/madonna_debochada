@@ -10,6 +10,9 @@ import time
 import json
 import threading
 from datetime import datetime, timedelta
+from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
+import requests
 
 # ✅ CONFIGURAÇÕES DO GRUPO
 GRUPO_ID = -1002606951329              # Substitua pelo ID do seu grupo
@@ -299,6 +302,101 @@ def manter_vivo():
         except:
             pass
         time.sleep(600)
+
+# ✅ Função para gerar a "Carteirinha" do novo membro (Versão segura para Render)
+def gerar_carteirinha(user, avatar_path_or_image):
+    largura, altura = 800, 450
+    cartao = Image.new("RGB", (largura, altura), color=(20, 24, 33)) # Fundo escuro elegante
+    draw = ImageDraw.Draw(cartao)
+
+    # Borda e cabeçalho temática Resenha & Uno
+    draw.rectangle([15, 15, largura - 15, altura - 15], outline=(235, 87, 87), width=3)
+    draw.rectangle([15, 15, largura - 15, 85], fill=(30, 36, 48))
+    
+    # Usando fonte padrão do sistema
+    draw.text((35, 33), "🎴 RESENHA & UNO — CREDENCIAL DE MEMBRO", fill=(255, 255, 255))
+
+    # Processar o Avatar do usuário (círculo)
+    try:
+        response = requests.get(avatar_path_or_image)
+        avatar = Image.open(BytesIO(response.content)).convert("RGBA")
+        avatar = avatar.resize((200, 200))
+
+        mascara = Image.new("L", (200, 200), 0)
+        draw_mascara = ImageDraw.Draw(mascara)
+        draw_mascara.ellipse((0, 0, 200, 200), fill=255)
+
+        avatar_circular = Image.new("RGBA", (200, 200))
+        avatar_circular.paste(avatar, (0, 0), mascara)
+
+        cartao.paste(avatar_circular, (50, 150), avatar_circular)
+        
+        draw.ellipse([46, 146, 254, 354], outline=(255, 215, 0), width=4)
+    except Exception as e:
+        print(f"Erro ao processar avatar: {e}")
+
+    # Dados do usuário
+    nome = user.first_name or "Membro"
+    username = f"@{user.username}" if user.username else "@sem_usuario"
+    
+    if len(nome) > 18:
+        nome = nome[:16] + "..."
+
+    draw.text((280, 160), "NOME:", fill=(150, 160, 180))
+    draw.text((280, 185), nome, fill=(255, 255, 255))
+
+    draw.text((280, 240), "USUÁRIO:", fill=(150, 160, 180))
+    draw.text((280, 265), username, fill=(0, 229, 255))
+
+    draw.text((280, 330), "STATUS: ✅ AUTORIZADO (Resenha, Quiz, Uno & Jogos)", fill=(100, 255, 100))
+
+    output = BytesIO()
+    cartao.save(output, format="PNG")
+    output.seek(0)
+    return output
+
+
+# ✅ Handler para novos membros que entram no grupo
+@bot.message_handler(content_types=['new_chat_members'])
+def boas_vindas_novos_membros(msg):
+    for novo_usuario in msg.new_chat_members:
+        if novo_usuario.id == bot.get_me().id:
+            continue
+
+        user_id = novo_usuario.id
+        nome = novo_usuario.first_name or "Amor"
+        mention = f"@{novo_usuario.username}" if novo_usuario.username else f"[{nome}](tg://user?id={user_id})"
+        mulher = e_mulher(novo_usuario)
+
+        avatar_url = None
+        try:
+            fotos = bot.get_user_profile_photos(user_id, limit=1)
+            if fotos.total_count > 0:
+                file_id = fotos.photos[0][-1].file_id
+                file_info = bot.get_file(file_id)
+                avatar_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_info.file_path}"
+        except Exception as e:
+            print(f"Erro ao buscar foto de perfil: {e}")
+
+        if not avatar_url:
+            avatar_url = "https://www.w3schools.com/howto/img_avatar.png"
+
+        try:
+            carteirinha_io = gerar_carteirinha(novo_usuario, avatar_url)
+            
+            saudacao_f = f"Opa, olha só quem chegou para somar na nossa mesa! Seja muito bem-vindo(a) {mention}! Puxe uma cadeira, prepare seu +4 no Uno e venha tankar nossos quizzes e resenhas. 🃏🔥"
+            saudacao_m = f"Salve, {mention}! Chegou reforço de peso no **Resenha & Uno**. Já vai esquentando os dados pro xadrez, damas e claro... preparando o psicológico pro +4! 🚀👑"
+            
+            frase_final = saudacao_f if mulher else saudacao_m
+
+            bot.send_photo(
+                chat_id=GRUPO_ID,
+                photo=carteirinha_io,
+                caption=frase_final,
+                parse_mode="Markdown"
+            )
+        except Exception as e:
+            bot.send_message(GRUPO_ID, f"Seja bem-vindo(a) ao **Resenha & Uno**, {mention}! 🎉 Divirta-se com a gente!", parse_mode="Markdown")
 
 # 🚀 INICIAR
 if __name__ == "__main__":
