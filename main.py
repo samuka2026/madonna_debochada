@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 import requests
 
 # ✅ CONFIGURAÇÕES DO GRUPO
-GRUPO_ID = [-1002606951329, -1002728824996]              # Substitua pelo ID do seu grupo
+GRUPO_ID = -1002728824996            # Substitua pelo ID do seu grupo
 DONO_ID = 8338739275                   # ID do dono da Madonna (submissão)
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
