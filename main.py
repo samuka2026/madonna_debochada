@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 import requests
 
 # ✅ CONFIGURAÇÕES DO GRUPO
-GRUPO_ID = -1002606951329            # Substitua pelo ID do seu grupo
+GRUPO_ID = [-1002606951329, -1002728824996]     # IDs dos seus grupos permitidos
 DONO_ID = 8338739275                   # ID do dono da Madonna (submissão)
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
@@ -84,8 +84,6 @@ frases_guardadas = []
 frases_usadas = []
 usuarios_registrados = {}
 enquetes_ativas = {}
-ranking_acertos = {}
-ultima_enquete = {"frase": "", "autor": "", "acertaram": []}
 
 # ✅ Envia mensagem com atraso
 def enviar_com_delay(delay_segundos, chat_id, texto, reply_id=None):
@@ -93,12 +91,29 @@ def enviar_com_delay(delay_segundos, chat_id, texto, reply_id=None):
         bot.send_message(chat_id, texto, reply_to_message_id=reply_id)
     threading.Timer(delay_segundos, tarefa).start()
 
+# ✅ Função auxiliar para formatar o nome com o @ nas opções da enquete
+def formatar_opcao(user_id):
+    dados = usuarios_registrados.get(user_id, {"nome": "Membro", "username": ""})
+    nome = dados["nome"]
+    username = dados["username"]
+    if username:
+        return f"{nome} (@{username})"
+    return nome
+
 # ✅ Handler principal
 @bot.message_handler(func=lambda msg: True)
 def responder(msg):
+    grupos_lista = GRUPO_ID if isinstance(GRUPO_ID, list) else [GRUPO_ID]
+    if msg.chat.id not in grupos_lista and msg.chat.type in ["group", "supergroup"]:
+        return
+
+    if not msg.text:
+        return
+
     texto = msg.text.lower()
     user_id = msg.from_user.id
-    nome = msg.from_user.first_name or msg.from_user.username or "Amor"
+    nome = msg.from_user.first_name or "Amor"
+    username = msg.from_user.username or ""
     mulher = e_mulher(msg.from_user)
     agora = datetime.now()
 
@@ -106,45 +121,51 @@ def responder(msg):
     if user_id == DONO_ID and texto == "/enquete":
         try:
             if not frases_guardadas:
-                bot.send_message(GRUPO_ID, "Não há frases registradas para criar a enquete 😅")
+                bot.send_message(msg.chat.id, "Não há frases registradas para criar a enquete 😅")
                 return
 
             candidatas = [f for f in frases_guardadas if f not in frases_usadas]
             if not candidatas:
-                bot.send_message(GRUPO_ID, "Todas as frases já foram usadas! 🤷‍♀️")
+                bot.send_message(msg.chat.id, "Todas as frases já foram usadas! 🤷‍♀️")
                 return
 
             frase, autor_id = random.choice(candidatas)
             frases_usadas.append((frase, autor_id))
 
-            if len(usuarios_registrados) < 4:
-                bot.send_message(GRUPO_ID, "Não há usuários suficientes para criar a enquete 😅")
+            outros_ids = [uid for uid in usuarios_registrados.keys() if uid != autor_id]
+            if len(outros_ids) < 3 or autor_id not in usuarios_registrados:
+                bot.send_message(msg.chat.id, "Não há usuários suficientes para criar opções da enquete 😅")
                 return
 
-            autor_nome = usuarios_registrados.get(autor_id, "???")
-            outros = [nome for uid, nome in usuarios_registrados.items() if uid != autor_id]
-            if len(outros) < 3:
-                bot.send_message(GRUPO_ID, "Não há usuários suficientes para criar opções da enquete 😅")
-                return
+            opcoes_ids = random.sample(outros_ids, 3) + [autor_id]
+            random.shuffle(opcoes_ids)
 
-            opcoes = random.sample(outros, 3) + [autor_nome]
-            random.shuffle(opcoes)
+            opcoes_texto = [formatar_opcao(uid) for uid in opcoes_ids]
+            corretor_texto = formatar_opcao(autor_id)
 
             pergunta = f"Quem disse essa frase?\n\n“{frase}”"
-            bot.send_poll(GRUPO_ID, pergunta, opcoes, is_anonymous=False, type="regular")
-            bot.send_message(GRUPO_ID, "Enquete manual criada! 🎉")
+            
+            for g_id in grupos_lista:
+                bot.send_poll(
+                    g_id,
+                    pergunta,
+                    opcoes_texto,
+                    type="quiz",
+                    correct_option_id=opcoes_texto.index(corretor_texto),
+                    is_anonymous=False
+                )
+            bot.send_message(msg.chat.id, "Enquete manual criada! 🎉")
         except Exception as e:
-            bot.send_message(GRUPO_ID, f"Erro ao criar enquete: {e}")
+            bot.send_message(msg.chat.id, f"Erro ao criar enquete: {e}")
         return
 
     # Registrar o usuário e a frase se for válida
-    if msg.text:
-        texto_limpo = msg.text.strip()
-        palavras = texto_limpo.split()
-        if len(palavras) >= 3 and not all(ch in "kKcC" for ch in texto_limpo):
-            if len(texto_limpo) > 5:
-                usuarios_registrados[user_id] = nome
-                frases_guardadas.append((texto_limpo, user_id))
+    texto_limpo = msg.text.strip()
+    palavras = texto_limpo.split()
+    if len(palavras) >= 3 and not all(ch in "kKcC" for ch in texto_limpo):
+        if len(texto_limpo) > 5:
+            usuarios_registrados[user_id] = {"nome": nome, "username": username}
+            frases_guardadas.append((texto_limpo, user_id))
 
     # 👑 Submissão ao dono
     if user_id == DONO_ID and frases_dono and ("madonna" in texto or f"@{bot.get_me().username.lower()}" in texto):
@@ -179,105 +200,43 @@ def responder(msg):
                 ultimos_envios_geral[user_id] = agora
             return
 
-# ✅ Handler de respostas de enquetes
-@bot.poll_answer_handler()
-def receber_voto(poll_answer):
-    poll_id = poll_answer.poll_id
-    user_id = poll_answer.user.id
-    first_name = poll_answer.user.first_name
+# ✅ Função para disparar enquetes periódicas (Automática, sem ranking e sem poluição)
+opt_grupos = GRUPO_ID if isinstance(GRUPO_ID, list) else [GRUPO_ID]
 
-    if poll_id not in enquetes_ativas:
-        return
-
-    resposta_certa = enquetes_ativas[poll_id]["resposta"]
-    if poll_answer.option_ids and resposta_certa == poll_answer.option_ids[0]:
-        ranking_acertos[user_id] = ranking_acertos.get(user_id, 0) + 1
-        if ultima_enquete:
-            ultima_enquete["acertaram"].append(first_name)
-
-# ✅ Função para disparar enquetes periódicas
 def disparar_enquete_periodica():
-    global ultima_enquete
     while True:
         agora = datetime.now()
         if 6 <= agora.hour < 24:  # só das 6h até meia-noite
-            chat_id = GRUPO_ID
+            if len(frases_guardadas) >= 5 and len(usuarios_registrados) >= 4:
+                frases_disponiveis = [f for f in frases_guardadas if f not in frases_usadas]
+                if frases_disponiveis:
+                    frase, autor_id = random.choice(frases_disponiveis)
+                    frases_usadas.append((frase, autor_id))
 
-            # postar resultado da última enquete
-            if ultima_enquete and ultima_enquete["frase"]:
-                frase = ultima_enquete["frase"]
-                autor = ultima_enquete["autor"]
-                acertaram = ultima_enquete["acertaram"]
+                    outros_ids = [uid for uid in usuarios_registrados.keys() if uid != autor_id]
+                    if len(outros_ids) >= 3 and autor_id in usuarios_registrados:
+                        opcoes_ids = random.sample(outros_ids, 3) + [autor_id]
+                        random.shuffle(opcoes_ids)
 
-                texto = f"✅ **Resultado da última enquete**\n\n"
-                texto += f"🗣️ **Quem falou a frase:**\n\"{frase}\"\n→ **{autor}**\n\n"
+                        opcoes_texto = [formatar_opcao(uid) for uid in opcoes_ids]
+                        corretor_texto = formatar_opcao(autor_id)
 
-                if acertaram:
-                    texto += f"🎯 **Acertaram:**\n" + "\n".join([f"- {nome}" for nome in acertaram]) + "\n\n"
-                else:
-                    texto += "😅 **Ninguém acertou.**\n\n"
+                        pergunta = f"📝 **Enquete:** Quem disse esta frase?\n\n💬 \"{frase}\""
+                        
+                        for g_id in opt_grupos:
+                            try:
+                                bot.send_poll(
+                                    g_id,
+                                    pergunta,
+                                    opcoes_texto,
+                                    type="quiz",
+                                    correct_option_id=opcoes_texto.index(corretor_texto),
+                                    is_anonymous=False
+                                )
+                            except Exception as e:
+                                print(f"Erro ao disparar enquete: {e}")
 
-                if ranking_acertos:
-                    texto += "🏆 **Ranking parcial do dia:**\n"
-                    for uid, pontos in sorted(ranking_acertos.items(), key=lambda x: x[1], reverse=True):
-                        nome = usuarios_registrados.get(uid, "??")
-                        texto += f"{pontos} pts - {nome}\n"
-
-                bot.send_message(chat_id, texto)
-
-            # pegar nova frase sem repetir
-            frases_disponiveis = [f for f in frases_guardadas if f not in frases_usadas]
-            if frases_disponiveis:
-                frase, autor_id = random.choice(frases_disponiveis)
-                frases_usadas.append((frase, autor_id))
-
-                usuarios = list(usuarios_registrados.keys())
-                random.shuffle(usuarios)
-                corretor = autor_id
-                # Pega 3 usuários aleatórios que não sejam o autor
-                opcoes = [usuarios_registrados[u] for u in usuarios if u != corretor]
-                opcoes = random.sample(opcoes, min(3, len(opcoes)))  # garante 3 opções
-                opcoes.append(usuarios_registrados[corretor])  # adiciona o autor
-                random.shuffle(opcoes)
-
-                pergunta = f"📝 **Enquete:** Quem disse esta frase?\n\n💬 \"{frase}\""
-                msg = bot.send_poll(
-                    chat_id,
-                    pergunta,
-                    opcoes,
-                    type="quiz",
-                    correct_option_id=opcoes.index(usuarios_registrados[corretor]),
-                    is_anonymous=False
-                )
-
-
-                ultima_enquete = {
-                    "frase": frase,
-                    "autor": usuarios_registrados[corretor],
-                    "acertaram": []
-                }
-                enquetes_ativas[msg.poll.id] = {"resposta": msg.poll.correct_option_id, "frase": frase}
-
-        time.sleep(10000)
-
-# ✅ Função para postar ranking final à meia-noite
-def postar_ranking_final():
-    global ranking_acertos
-    while True:
-        agora = datetime.now()
-        if agora.hour == 0 and agora.minute == 0:
-            if ranking_acertos:
-                texto = "🏆 Ranking final do dia:\n"
-                ordenado = sorted(ranking_acertos.items(), key=lambda x: x[1], reverse=True)
-                for uid, pontos in ordenado:
-                    nome = usuarios_registrados.get(uid, "??")
-                    texto += f"- {nome}: {pontos} pontos\n"
-                bot.send_message(GRUPO_ID, texto)
-                ranking_acertos = {}
-        time.sleep(60)
-
-# inicia a thread do ranking final
-threading.Thread(target=postar_ranking_final, daemon=True).start()
+        time.sleep(14400) # A cada 4 horas
 
 # 🔁 ROTA FLASK PARA WEBHOOK
 @app.route(f"/{TOKEN}", methods=["POST"])
@@ -390,13 +349,13 @@ def boas_vindas_novos_membros(msg):
             frase_final = saudacao_f if mulher else saudacao_m
 
             bot.send_photo(
-                chat_id=GRUPO_ID,
+                chat_id=msg.chat.id,
                 photo=carteirinha_io,
                 caption=frase_final,
                 parse_mode="Markdown"
             )
         except Exception as e:
-            bot.send_message(GRUPO_ID, f"Seja bem-vindo(a) ao **Resenha & Uno**, {mention}! 🎉 Divirta-se com a gente!", parse_mode="Markdown")
+            bot.send_message(msg.chat.id, f"Seja bem-vindo(a) ao **Resenha & Uno**, {mention}! 🎉 Divirta-se com a gente!", parse_mode="Markdown")
 
 # 🚀 INICIAR
 if __name__ == "__main__":
