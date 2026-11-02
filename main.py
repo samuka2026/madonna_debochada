@@ -236,7 +236,7 @@ def disparar_enquete_periodica():
                             except Exception as e:
                                 print(f"Erro ao disparar enquete: {e}")
 
-        time.sleep(14400) # A cada 4 horas
+        time.sleep(2000) # A cada 33 minutos
 
 # 🔁 ROTA FLASK PARA WEBHOOK
 @app.route(f"/{TOKEN}", methods=["POST"])
