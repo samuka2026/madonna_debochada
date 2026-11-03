@@ -1,6 +1,6 @@
 # ✅ BOT MADONNA REFORMULADA - main.py
-# Versão especial com listas .json na raiz, saudacões por gênero e horário, elogios, desejos para Apollo,
-# defesa automática do Apollo, submissão ao dono quando mencionada, e estrutura organizada e leve. 💅💖
+# Versão especial com listas .json na raiz, saudações por gênero e horário, elogios, desejos para Apollo,
+# defesa automática do Apollo, submissão ao dono quando mencionada, ranking no pódio e enquetes integradas. 💅💖
 
 from flask import Flask, request
 import telebot
@@ -84,6 +84,7 @@ frases_guardadas = []
 frases_usadas = []
 usuarios_registrados = {}
 enquetes_ativas = {}
+ranking_geral = {}  # Guarda a pontuação de quem acerta as enquetes
 
 # ✅ Envia mensagem com atraso
 def enviar_com_delay(delay_segundos, chat_id, texto, reply_id=None):
@@ -99,6 +100,27 @@ def formatar_opcao(user_id):
     if username:
         return f"{nome} (@{username})"
     return nome
+
+# ✅ Handler de respostas de enquetes (Computa os pontos na hora do voto)
+@bot.poll_answer_handler()
+def receber_voto(poll_answer):
+    poll_id = poll_answer.poll_id
+    user_id = poll_answer.user.id
+    first_name = poll_answer.user.first_name
+    username = poll_answer.user.username or ""
+
+    if poll_id not in enquetes_ativas:
+        return
+
+    dados_enquete = enquetes_ativas[poll_id]
+    resposta_certa = dados_enquete["resposta"]
+
+    if poll_answer.option_ids and resposta_certa in poll_answer.option_ids:
+        if user_id not in usuarios_registrados:
+            usuarios_registrados[user_id] = {"nome": first_name, "username": username}
+        
+        # Adiciona 1 ponto para quem acertou
+        ranking_geral[user_id] = ranking_geral.get(user_id, 0) + 1
 
 # ✅ Handler principal
 @bot.message_handler(func=lambda msg: True)
@@ -117,7 +139,7 @@ def responder(msg):
     mulher = e_mulher(msg.from_user)
     agora = datetime.now()
 
-    # 🔹 COMANDO DO DONO PARA CRIAR ENQUETE MANUALMENTE
+    # 🔹 COMANDO DO DONO PARA CRIAR ENQUETE MANUALMENTE COM RANKING
     if user_id == DONO_ID and texto == "/enquete":
         try:
             if not frases_guardadas:
@@ -142,19 +164,41 @@ def responder(msg):
 
             opcoes_texto = [formatar_opcao(uid) for uid in opcoes_ids]
             corretor_texto = formatar_opcao(autor_id)
+            correct_id = opcoes_texto.index(corretor_texto)
 
-            pergunta = f"Quem disse essa frase?\n\n“{frase}”"
+            # Monta o balão do ranking manual
+            texto_ranking = ""
+            if ranking_geral:
+                ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)[:10]
+                texto_ranking = "🏆 **Ranking de Acertos do Torneio:**\n"
+                posicoes_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+                
+                for idx, (uid, pontos) in enumerate(ranking_ordenado):
+                    dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
+                    u_nome = dados_u["nome"]
+                    u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
+                    emoji_pos = posicoes_emojis[idx] if idx < len(posicoes_emojis) else f"{idx+1}º"
+                    texto_ranking += f"{emoji_pos} {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                texto_ranking += "\n"
+
+            pergunta = f"💬 Quem disse essa frase?\n\n\"{frase}\""
             
             for g_id in grupos_lista:
-                bot.send_poll(
+                if texto_ranking:
+                    bot.send_message(g_id, texto_ranking, parse_mode="Markdown")
+                    time.sleep(2)
+                
+                msg_poll = bot.send_poll(
                     g_id,
                     pergunta,
                     opcoes_texto,
                     type="quiz",
-                    correct_option_id=opcoes_texto.index(corretor_texto),
+                    correct_option_id=correct_id,
                     is_anonymous=False
                 )
-            bot.send_message(msg.chat.id, "Enquete manual criada! 🎉")
+                enquetes_ativas[msg_poll.poll.id] = {"resposta": correct_id}
+
+            return
         except Exception as e:
             bot.send_message(msg.chat.id, f"Erro ao criar enquete: {e}")
         return
@@ -200,13 +244,14 @@ def responder(msg):
                 ultimos_envios_geral[user_id] = agora
             return
 
-# ✅ Função para disparar enquetes periódicas (Automática, sem ranking e sem poluição)
+# ✅ Função para disparar o balão do ranking e logo após a enquete periódica automática
 opt_grupos = GRUPO_ID if isinstance(GRUPO_ID, list) else [GRUPO_ID]
 
 def disparar_enquete_periodica():
+    global enquetes_ativas
     while True:
         agora = datetime.now()
-        if 6 <= agora.hour < 24:  # só das 6h até meia-noite
+        if 6 <= agora.hour < 24:  # das 6h até meia-noite
             if len(frases_guardadas) >= 5 and len(usuarios_registrados) >= 4:
                 frases_disponiveis = [f for f in frases_guardadas if f not in frases_usadas]
                 if frases_disponiveis:
@@ -220,23 +265,44 @@ def disparar_enquete_periodica():
 
                         opcoes_texto = [formatar_opcao(uid) for uid in opcoes_ids]
                         corretor_texto = formatar_opcao(autor_id)
+                        correct_id = opcoes_texto.index(corretor_texto)
 
-                        pergunta = f"📝 **Enquete:** Quem disse esta frase?\n\n💬 \"{frase}\""
+                        # Monta o balão do ranking automático
+                        texto_ranking = ""
+                        if ranking_geral:
+                            ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)[:10]
+                            texto_ranking = "🏆 **Ranking de Acertos do Torneio:**\n"
+                            posicoes_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+                            
+                            for idx, (uid, pontos) in enumerate(ranking_ordenado):
+                                dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
+                                u_nome = dados_u["nome"]
+                                u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
+                                emoji_pos = posicoes_emojis[idx] if idx < len(posicoes_emojis) else f"{idx+1}º"
+                                texto_ranking += f"{emoji_pos} {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                            texto_ranking += "\n"
+
+                        pergunta = f"💬 Quem disse esta frase?\n\n\"{frase}\""
                         
                         for g_id in opt_grupos:
                             try:
-                                bot.send_poll(
+                                if texto_ranking:
+                                    bot.send_message(g_id, texto_ranking, parse_mode="Markdown")
+                                    time.sleep(2)
+                                
+                                msg_poll = bot.send_poll(
                                     g_id,
                                     pergunta,
                                     opcoes_texto,
                                     type="quiz",
-                                    correct_option_id=opcoes_texto.index(corretor_texto),
+                                    correct_option_id=correct_id,
                                     is_anonymous=False
                                 )
+                                enquetes_ativas[msg_poll.poll.id] = {"resposta": correct_id}
                             except Exception as e:
-                                print(f"Erro ao disparar enquete: {e}")
+                                print(f"Erro ao disparar enquete com ranking: {e}")
 
-        time.sleep(2000) # A cada 33 minutos
+        time.sleep(2000) # Intervalo entre as enquetes
 
 # 🔁 ROTA FLASK PARA WEBHOOK
 @app.route(f"/{TOKEN}", methods=["POST"])
