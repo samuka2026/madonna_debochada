@@ -9,7 +9,7 @@ import random
 import time
 import json
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import requests
