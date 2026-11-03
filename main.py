@@ -366,7 +366,7 @@ def disparar_enquete_periodica():
                             except Exception as e:
                                 print(f"Erro ao disparar enquete com ranking: {e}")
 
-        time.sleep(2000) # Intervalo entre as enquetes
+        time.sleep(2700) # Intervalo entre as enquetes
 
 # 🔁 ROTA FLASK PARA WEBHOOK
 @app.route(f"/{TOKEN}", methods=["POST"])
