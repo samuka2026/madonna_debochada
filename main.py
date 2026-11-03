@@ -1,6 +1,6 @@
 # ✅ BOT MADONNA REFORMULADA - main.py
 # Versão especial com listas .json na raiz, saudações por gênero e horário, elogios, desejos para Apollo,
-# defesa automática do Apollo, submissão ao dono quando mencionada, ranking no pódio e enquetes integradas. 💅💖
+# defesa automática do Apollo, submissão ao dono, ranking completo e fechamento automático à meia-noite. 💅💖
 
 from flask import Flask, request
 import telebot
@@ -122,11 +122,55 @@ def receber_voto(poll_answer):
         # Adiciona 1 ponto para quem acertou
         ranking_geral[user_id] = ranking_geral.get(user_id, 0) + 1
 
+# ✅ Função para postar o ranking final à meia-noite (Horário de Brasília)
+opt_grupos = GRUPO_ID if isinstance(GRUPO_ID, list) else [GRUPO_ID]
+
+def postar_ranking_meia_noite():
+    global ranking_geral
+    while True:
+        agora = datetime.now()
+        # Verifica se são exatamente 00:00
+        if agora.hour == 0 and agora.minute == 0:
+            if ranking_geral:
+                ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)
+                
+                texto = "🕛 **Fim do Turno! Ranking Final do Dia:**\n\n"
+                
+                for idx, (uid, pontos) in enumerate(ranking_ordenado):
+                    dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
+                    u_nome = dados_u["nome"]
+                    u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
+                    
+                    if idx == 0:
+                        texto += f"🥇 **1º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}** *(Campeão! 👑)*\n"
+                    elif idx == 1:
+                        texto += f"🥈 **2º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                    elif idx == 2:
+                        texto += f"🥉 **3º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                    else:
+                        texto += f"{idx+1}º {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                
+                texto += "\n*🧹 Placar zerado com sucesso! Amanhã tem mais disputa na mesa! 🃏🔥*"
+                
+                for g_id in opt_grupos:
+                    try:
+                        bot.send_message(g_id, texto, parse_mode="Markdown")
+                    except Exception as e:
+                        print(f"Erro ao enviar ranking de meia-noite: {e}")
+                
+                # Zera o placar para o dia seguinte
+                ranking_geral = {}
+                
+            time.sleep(70) # Aguarda 1 minuto para não repetir na mesma hora
+        time.sleep(30)   # Checa a cada 30 segundos
+
+# Inicia a thread do ranking de meia-noite
+threading.Thread(target=postar_ranking_meia_noite, daemon=True).start()
+
 # ✅ Handler principal
 @bot.message_handler(func=lambda msg: True)
 def responder(msg):
-    grupos_lista = GRUPO_ID if isinstance(GRUPO_ID, list) else [GRUPO_ID]
-    if msg.chat.id not in grupos_lista and msg.chat.type in ["group", "supergroup"]:
+    if msg.chat.id not in opt_grupos and msg.chat.type in ["group", "supergroup"]:
         return
 
     if not msg.text:
@@ -139,7 +183,7 @@ def responder(msg):
     mulher = e_mulher(msg.from_user)
     agora = datetime.now()
 
-    # 🔹 COMANDO DO DONO PARA CRIAR ENQUETE MANUALMENTE COM RANKING
+    # 🔹 COMANDO DO DONO PARA CRIAR ENQUETE MANUALMENTE COM RANKING COMPLETO
     if user_id == DONO_ID and texto == "/enquete":
         try:
             if not frases_guardadas:
@@ -166,24 +210,35 @@ def responder(msg):
             corretor_texto = formatar_opcao(autor_id)
             correct_id = opcoes_texto.index(corretor_texto)
 
-            # Monta o balão do ranking manual
+            # Monta o balão do ranking completo
             texto_ranking = ""
             if ranking_geral:
-                ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)[:10]
+                ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)
                 texto_ranking = "🏆 **Ranking de Acertos do Torneio:**\n"
-                posicoes_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
                 
                 for idx, (uid, pontos) in enumerate(ranking_ordenado):
                     dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
                     u_nome = dados_u["nome"]
                     u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
-                    emoji_pos = posicoes_emojis[idx] if idx < len(posicoes_emojis) else f"{idx+1}º"
+                    
+                    if idx == 0:
+                        emoji_pos = "🥇"
+                    elif idx == 1:
+                        emoji_pos = "🥈"
+                    elif idx == 2:
+                        emoji_pos = "🥉"
+                    elif idx < 10:
+                        posicoes_emojis = ["4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+                        emoji_pos = posicoes_emojis[idx-3]
+                    else:
+                        emoji_pos = f"{idx+1}º"
+                        
                     texto_ranking += f"{emoji_pos} {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
                 texto_ranking += "\n"
 
             pergunta = f"💬 Quem disse essa frase?\n\n\"{frase}\""
             
-            for g_id in grupos_lista:
+            for g_id in opt_grupos:
                 if texto_ranking:
                     bot.send_message(g_id, texto_ranking, parse_mode="Markdown")
                     time.sleep(2)
@@ -244,9 +299,7 @@ def responder(msg):
                 ultimos_envios_geral[user_id] = agora
             return
 
-# ✅ Função para disparar o balão do ranking e logo após a enquete periódica automática
-opt_grupos = GRUPO_ID if isinstance(GRUPO_ID, list) else [GRUPO_ID]
-
+# ✅ Função para disparar o balão do ranking completo e logo após a enquete periódica automática
 def disparar_enquete_periodica():
     global enquetes_ativas
     while True:
@@ -267,22 +320,33 @@ def disparar_enquete_periodica():
                         corretor_texto = formatar_opcao(autor_id)
                         correct_id = opcoes_texto.index(corretor_texto)
 
-                        # Monta o balão do ranking automático
+                        # Monta o balão do ranking completo
                         texto_ranking = ""
                         if ranking_geral:
-                            ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)[:10]
+                            ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)
                             texto_ranking = "🏆 **Ranking de Acertos do Torneio:**\n"
-                            posicoes_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
                             
                             for idx, (uid, pontos) in enumerate(ranking_ordenado):
                                 dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
                                 u_nome = dados_u["nome"]
                                 u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
-                                emoji_pos = posicoes_emojis[idx] if idx < len(posicoes_emojis) else f"{idx+1}º"
+                                
+                                if idx == 0:
+                                    emoji_pos = "🥇"
+                                elif idx == 1:
+                                    emoji_pos = "🥈"
+                                elif idx == 2:
+                                    emoji_pos = "🥉"
+                                elif idx < 10:
+                                    posicoes_emojis = ["4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+                                    emoji_pos = posicoes_emojis[idx-3]
+                                else:
+                                    emoji_pos = f"{idx+1}º"
+                                    
                                 texto_ranking += f"{emoji_pos} {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
                             texto_ranking += "\n"
 
-                        pergunta = f"💬 Quem disse esta frase?\n\n\"{frase}\""
+                        pergunta = f"💬 Quem disse essa frase?\n\n\"{frase}\""
                         
                         for g_id in opt_grupos:
                             try:
