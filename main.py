@@ -505,5 +505,3 @@ if __name__ == "__main__":
     threading.Thread(target=disparar_enquete_periodica, daemon=True).start()
     port = int(os.getenv("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-```
