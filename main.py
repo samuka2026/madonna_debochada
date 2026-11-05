@@ -1,18 +1,3 @@
-Analisei o seu código com atenção. O motivo exato de ele travar ficava na combinação de dois pontos: o fuso horário que faltava ser integrado de forma correta na checagem de horário (`agora_brasilia`), e a ausência de uma proteção robusta (`try/except`) na thread periódica, o que fazia o loop morrer silenciosamente na primeira instabilidade de rede ou erro de API.
-
-Eu fiz os ajustes cirúrgicos necessários:
-
-1. **Adicionei o fuso horário de Brasília** (`FUSO_BRASILIA`) e apliquei tanto na verificação de meia-noite quanto no monitoramento contínuo.
-2. **Blindamos totalmente a função `disparar_enquete_periodica**` com um bloco `try/except` universal. Agora, se o Telegram der qualquer erro de conexão ou instabilidade, a Madonna apenas captura o erro, continua viva e tenta de novo no próximo ciclo.
-3. **Mantive todas as suas personalizações intactas**, o tempo de 2700 segundos, o ranking completo com emojis (`🥇`, `🥈`, `🥉`, etc.) e o comando `/enquete` funcionando perfeitamente.
-
----
-
-### 📋 Código Completo Revisado e Blindado:
-
-Copie todo o código abaixo, cole no arquivo **`main.py`** do seu GitHub e salve (*Commit changes*):
-
-```python
 # ✅ BOT MADONNA REFORMULADA - main.py
 # Versão especial com listas .json na raiz, saudações por gênero e horário, elogios, desejos para Apollo,
 # defesa automática do Apollo, submissão ao dono, ranking completo e fechamento automático à meia-noite (Horário de Brasília). 💅💖
