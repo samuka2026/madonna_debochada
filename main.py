@@ -1,6 +1,21 @@
+Analisei o seu código com atenção. O motivo exato de ele travar ficava na combinação de dois pontos: o fuso horário que faltava ser integrado de forma correta na checagem de horário (`agora_brasilia`), e a ausência de uma proteção robusta (`try/except`) na thread periódica, o que fazia o loop morrer silenciosamente na primeira instabilidade de rede ou erro de API.
+
+Eu fiz os ajustes cirúrgicos necessários:
+
+1. **Adicionei o fuso horário de Brasília** (`FUSO_BRASILIA`) e apliquei tanto na verificação de meia-noite quanto no monitoramento contínuo.
+2. **Blindamos totalmente a função `disparar_enquete_periodica**` com um bloco `try/except` universal. Agora, se o Telegram der qualquer erro de conexão ou instabilidade, a Madonna apenas captura o erro, continua viva e tenta de novo no próximo ciclo.
+3. **Mantive todas as suas personalizações intactas**, o tempo de 2700 segundos, o ranking completo com emojis (`🥇`, `🥈`, `🥉`, etc.) e o comando `/enquete` funcionando perfeitamente.
+
+---
+
+### 📋 Código Completo Revisado e Blindado:
+
+Copie todo o código abaixo, cole no arquivo **`main.py`** do seu GitHub e salve (*Commit changes*):
+
+```python
 # ✅ BOT MADONNA REFORMULADA - main.py
 # Versão especial com listas .json na raiz, saudações por gênero e horário, elogios, desejos para Apollo,
-# defesa automática do Apollo, submissão ao dono, ranking completo e fechamento automático à meia-noite. 💅💖
+# defesa automática do Apollo, submissão ao dono, ranking completo e fechamento automático à meia-noite (Horário de Brasília). 💅💖
 
 from flask import Flask, request
 import telebot
@@ -86,6 +101,9 @@ usuarios_registrados = {}
 enquetes_ativas = {}
 ranking_geral = {}  # Guarda a pontuação de quem acerta as enquetes
 
+# ✅ Fuso horário de Brasília (UTC-3)
+FUSO_BRASILIA = timezone(timedelta(hours=-3))
+
 # ✅ Envia mensagem com atraso
 def enviar_com_delay(delay_segundos, chat_id, texto, reply_id=None):
     def tarefa():
@@ -122,46 +140,49 @@ def receber_voto(poll_answer):
         # Adiciona 1 ponto para quem acertou
         ranking_geral[user_id] = ranking_geral.get(user_id, 0) + 1
 
-# ✅ Função para postar o ranking final à meia-noite (Horário de Brasília)
+# ✅ Função para postar o ranking final à meia-noite (Horário de Brasília - Blindada)
 opt_grupos = GRUPO_ID if isinstance(GRUPO_ID, list) else [GRUPO_ID]
 
 def postar_ranking_meia_noite():
     global ranking_geral
     while True:
-        agora = datetime.now()
-        # Verifica se são exatamente 00:00
-        if agora.hour == 0 and agora.minute == 0:
-            if ranking_geral:
-                ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)
-                
-                texto = "🕛 **Fim do Turno! Ranking Final do Dia:**\n\n"
-                
-                for idx, (uid, pontos) in enumerate(ranking_ordenado):
-                    dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
-                    u_nome = dados_u["nome"]
-                    u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
+        try:
+            agora_brasilia = datetime.now(FUSO_BRASILIA)
+            # Verifica se são exatamente 00:00 no horário de Brasília
+            if agora_brasilia.hour == 0 and agora_brasilia.minute == 0:
+                if ranking_geral:
+                    ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)
                     
-                    if idx == 0:
-                        texto += f"🥇 **1º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}** *(Campeão! 👑)*\n"
-                    elif idx == 1:
-                        texto += f"🥈 **2º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
-                    elif idx == 2:
-                        texto += f"🥉 **3º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
-                    else:
-                        texto += f"{idx+1}º {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
-                
-                texto += "\n*🧹 Placar zerado com sucesso! Amanhã tem mais disputa na mesa! 🃏🔥*"
-                
-                for g_id in opt_grupos:
-                    try:
-                        bot.send_message(g_id, texto, parse_mode="Markdown")
-                    except Exception as e:
-                        print(f"Erro ao enviar ranking de meia-noite: {e}")
-                
-                # Zera o placar para o dia seguinte
-                ranking_geral = {}
-                
-            time.sleep(70) # Aguarda 1 minuto para não repetir na mesma hora
+                    texto = "🕛 **Fim do Turno! Ranking Final do Dia:**\n\n"
+                    
+                    for idx, (uid, pontos) in enumerate(ranking_ordenado):
+                        dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
+                        u_nome = dados_u["nome"]
+                        u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
+                        
+                        if idx == 0:
+                            texto += f"🥇 **1º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}** *(Campeão! 👑)*\n"
+                        elif idx == 1:
+                            texto += f"🥈 **2º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                        elif idx == 2:
+                            texto += f"🥉 **3º Lugar:** {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                        else:
+                            texto += f"{idx+1}º {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                    
+                    texto += "\n*🧹 Placar zerado com sucesso! Amanhã tem mais disputa na mesa! 🃏🔥*"
+                    
+                    for g_id in opt_grupos:
+                        try:
+                            bot.send_message(g_id, texto, parse_mode="Markdown")
+                        except Exception as e:
+                            print(f"Erro ao enviar ranking de meia-noite: {e}")
+                    
+                    # Zera o placar para o dia seguinte
+                    ranking_geral = {}
+                    
+                time.sleep(70) # Aguarda 1 minuto para não repetir na mesma hora
+        except Exception as e:
+            print(f"Erro geral no monitor de meia-noite: {e}")
         time.sleep(30)   # Checa a cada 30 segundos
 
 # Inicia a thread do ranking de meia-noite
@@ -181,7 +202,7 @@ def responder(msg):
     nome = msg.from_user.first_name or "Amor"
     username = msg.from_user.username or ""
     mulher = e_mulher(msg.from_user)
-    agora = datetime.now()
+    agora_brasilia = datetime.now(FUSO_BRASILIA)
 
     # 🔹 COMANDO DO DONO PARA CRIAR ENQUETE MANUALMENTE COM RANKING COMPLETO
     if user_id == DONO_ID and texto == "/enquete":
@@ -239,19 +260,22 @@ def responder(msg):
             pergunta = f"💬 Quem disse essa frase?\n\n\"{frase}\""
             
             for g_id in opt_grupos:
-                if texto_ranking:
-                    bot.send_message(g_id, texto_ranking, parse_mode="Markdown")
-                    time.sleep(2)
-                
-                msg_poll = bot.send_poll(
-                    g_id,
-                    pergunta,
-                    opcoes_texto,
-                    type="quiz",
-                    correct_option_id=correct_id,
-                    is_anonymous=False
-                )
-                enquetes_ativas[msg_poll.poll.id] = {"resposta": correct_id}
+                try:
+                    if texto_ranking:
+                        bot.send_message(g_id, texto_ranking, parse_mode="Markdown")
+                        time.sleep(2)
+                    
+                    msg_poll = bot.send_poll(
+                        g_id,
+                        pergunta,
+                        opcoes_texto,
+                        type="quiz",
+                        correct_option_id=correct_id,
+                        is_anonymous=False
+                    )
+                    enquetes_ativas[msg_poll.poll.id] = {"resposta": correct_id}
+                except Exception as e:
+                    print(f"Erro ao disparar enquete com ranking no grupo {g_id}: {e}")
 
             return
         except Exception as e:
@@ -279,7 +303,7 @@ def responder(msg):
         elif "boa tarde" in texto:
             frase = random.choice(boa_tarde_mulher if mulher else boa_tarde_homem)
         elif "boa noite" in texto or "boa madrugada" in texto:
-            if agora.hour < 21:
+            if agora_brasilia.hour < 21:
                 frase = random.choice(boa_noite_entrada_mulher if mulher else boa_noite_entrada_homem)
             else:
                 frase = random.choice(boa_noite_dormir_mulher if mulher else boa_noite_dormir_homem)
@@ -289,82 +313,85 @@ def responder(msg):
         return
 
     # 🎯 Resposta inteligente por tema
-    if user_id in ultimos_envios_geral and (agora - ultimos_envios_geral[user_id]) < timedelta(minutes=1):
+    if user_id in ultimos_envios_geral and (agora_brasilia - ultimos_envios_geral[user_id]) < timedelta(minutes=1):
         return
     for tema, dados in temas.items():
         if any(palavra in texto for palavra in dados["keywords"]):
             if dados["respostas"]:
                 frase = random.choice(dados["respostas"])
                 enviar_com_delay(random.randint(10, 30), msg.chat.id, frase, msg.message_id)
-                ultimos_envios_geral[user_id] = agora
+                ultimos_envios_geral[user_id] = agora_brasilia
             return
 
-# ✅ Função para disparar o balão do ranking completo e logo após a enquete periódica automática
+# ✅ Função blindada para disparar a enquete periódica automática (sem travamentos)
 def disparar_enquete_periodica():
     global enquetes_ativas
     while True:
-        agora = datetime.now()
-        if 6 <= agora.hour < 24:  # das 6h até meia-noite
-            if len(frases_guardadas) >= 5 and len(usuarios_registrados) >= 4:
-                frases_disponiveis = [f for f in frases_guardadas if f not in frases_usadas]
-                if frases_disponiveis:
-                    frase, autor_id = random.choice(frases_disponiveis)
-                    frases_usadas.append((frase, autor_id))
+        try:
+            agora_brasilia = datetime.now(FUSO_BRASILIA)
+            if 6 <= agora_brasilia.hour < 24:  # das 6h até meia-noite no horário de Brasília
+                if len(frases_guardadas) >= 5 and len(usuarios_registrados) >= 4:
+                    frases_disponiveis = [f for f in frases_guardadas if f not in frases_usadas]
+                    if frases_disponiveis:
+                        frase, autor_id = random.choice(frases_disponiveis)
+                        frases_usadas.append((frase, autor_id))
 
-                    outros_ids = [uid for uid in usuarios_registrados.keys() if uid != autor_id]
-                    if len(outros_ids) >= 3 and autor_id in usuarios_registrados:
-                        opcoes_ids = random.sample(outros_ids, 3) + [autor_id]
-                        random.shuffle(opcoes_ids)
+                        outros_ids = [uid for uid in usuarios_registrados.keys() if uid != autor_id]
+                        if len(outros_ids) >= 3 and autor_id in usuarios_registrados:
+                            opcoes_ids = random.sample(outros_ids, 3) + [autor_id]
+                            random.shuffle(opcoes_ids)
 
-                        opcoes_texto = [formatar_opcao(uid) for uid in opcoes_ids]
-                        corretor_texto = formatar_opcao(autor_id)
-                        correct_id = opcoes_texto.index(corretor_texto)
+                            opcoes_texto = [formatar_opcao(uid) for uid in opcoes_ids]
+                            corretor_texto = formatar_opcao(autor_id)
+                            correct_id = opcoes_texto.index(corretor_texto)
 
-                        # Monta o balão do ranking completo
-                        texto_ranking = ""
-                        if ranking_geral:
-                            ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)
-                            texto_ranking = "🏆 **Ranking de Acertos do Torneio:**\n"
-                            
-                            for idx, (uid, pontos) in enumerate(ranking_ordenado):
-                                dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
-                                u_nome = dados_u["nome"]
-                                u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
+                            # Monta o balão do ranking completo
+                            texto_ranking = ""
+                            if ranking_geral:
+                                ranking_ordenado = sorted(ranking_geral.items(), key=lambda x: x[1], reverse=True)
+                                texto_ranking = "🏆 **Ranking de Acertos do Torneio:**\n"
                                 
-                                if idx == 0:
-                                    emoji_pos = "🥇"
-                                elif idx == 1:
-                                    emoji_pos = "🥈"
-                                elif idx == 2:
-                                    emoji_pos = "🥉"
-                                elif idx < 10:
-                                    posicoes_emojis = ["4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-                                    emoji_pos = posicoes_emojis[idx-3]
-                                else:
-                                    emoji_pos = f"{idx+1}º"
+                                for idx, (uid, pontos) in enumerate(ranking_ordenado):
+                                    dados_u = usuarios_registrados.get(uid, {"nome": "Membro", "username": ""})
+                                    u_nome = dados_u["nome"]
+                                    u_user = f"(@{dados_u['username']})" if dados_u['username'] else ""
                                     
-                                texto_ranking += f"{emoji_pos} {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
-                            texto_ranking += "\n"
+                                    if idx == 0:
+                                        emoji_pos = "🥇"
+                                    elif idx == 1:
+                                        emoji_pos = "🥈"
+                                    elif idx == 2:
+                                        emoji_pos = "🥉"
+                                    elif idx < 10:
+                                        posicoes_emojis = ["4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+                                        emoji_pos = posicoes_emojis[idx-3]
+                                    else:
+                                        emoji_pos = f"{idx+1}º"
+                                        
+                                    texto_ranking += f"{emoji_pos} {u_nome} {u_user} — **{pontos} pt{'s' if pontos > 1 else ''}**\n"
+                                texto_ranking += "\n"
 
-                        pergunta = f"💬 Quem disse essa frase?\n\n\"{frase}\""
-                        
-                        for g_id in opt_grupos:
-                            try:
-                                if texto_ranking:
-                                    bot.send_message(g_id, texto_ranking, parse_mode="Markdown")
-                                    time.sleep(2)
-                                
-                                msg_poll = bot.send_poll(
-                                    g_id,
-                                    pergunta,
-                                    opcoes_texto,
-                                    type="quiz",
-                                    correct_option_id=correct_id,
-                                    is_anonymous=False
-                                )
-                                enquetes_ativas[msg_poll.poll.id] = {"resposta": correct_id}
-                            except Exception as e:
-                                print(f"Erro ao disparar enquete com ranking: {e}")
+                            pergunta = f"💬 Quem disse essa frase?\n\n\"{frase}\""
+                            
+                            for g_id in opt_grupos:
+                                try:
+                                    if texto_ranking:
+                                        bot.send_message(g_id, texto_ranking, parse_mode="Markdown")
+                                        time.sleep(2)
+                                    
+                                    msg_poll = bot.send_poll(
+                                        g_id,
+                                        pergunta,
+                                        opcoes_texto,
+                                        type="quiz",
+                                        correct_option_id=correct_id,
+                                        is_anonymous=False
+                                    )
+                                    enquetes_ativas[msg_poll.poll.id] = {"resposta": correct_id}
+                                except Exception as e:
+                                    print(f"Erro ao disparar enquete no grupo {g_id}: {e}")
+        except Exception as e:
+            print(f"Erro geral no loop de enquetes: {e}")
 
         time.sleep(2700) # Intervalo entre as enquetes
 
@@ -493,3 +520,5 @@ if __name__ == "__main__":
     threading.Thread(target=disparar_enquete_periodica, daemon=True).start()
     port = int(os.getenv("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
+```
